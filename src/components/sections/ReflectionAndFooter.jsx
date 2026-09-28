@@ -195,14 +195,28 @@ export function PlayerReflection({ isPdf, pdfPart }) {
       {(!isPdf || !pdfPart || pdfPart === 1) && (
         <>
           {/* Section Header */}
-          <div className="flex items-center justify-between py-1">
-            <h2 className="text-xl font-black uppercase text-white tracking-wider">
-              PLAYER REFLECTION
-            </h2>
-            <span className="text-[10px] font-bold text-white/50 tracking-wider">
-              POST-MATCH REVIEW
-            </span>
-          </div>
+          {isPdf ? (
+            <div className="text-center pb-3 mb-2 border-b border-white/15">
+              <div className="text-[10px] font-black tracking-[0.25em] text-[#FF4422] uppercase">
+                FOOTBALLER ATHLETICS • TOUCHES
+              </div>
+              <h1 className="text-2xl font-black uppercase tracking-wider text-white mt-1">
+                PLAYER REFLECTION
+              </h1>
+              <p className="text-[10px] font-bold tracking-wider text-white/50 uppercase mt-0.5">
+                POST-MATCH REVIEW & SELF-ASSESSMENT
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between py-1">
+              <h2 className="text-xl font-black uppercase text-white tracking-wider">
+                PLAYER REFLECTION
+              </h2>
+              <span className="text-[10px] font-bold text-white/50 tracking-wider">
+                POST-MATCH REVIEW
+              </span>
+            </div>
+          )}
 
           {/* Player Info Inputs */}
           <div className="grid grid-cols-2 gap-3 p-3.5 rounded-2xl border border-white/10 bg-[#12151D]">
@@ -216,7 +230,8 @@ export function PlayerReflection({ isPdf, pdfPart }) {
                 placeholder="Player name"
                 value={formData.playerName}
                 onChange={handleTextChange}
-                className="w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422]"
+                data-align="center"
+                className={`w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422] ${isPdf ? "text-center" : ""}`}
               />
             </div>
 
@@ -230,7 +245,8 @@ export function PlayerReflection({ isPdf, pdfPart }) {
                 placeholder="Age"
                 value={formData.playerAge}
                 onChange={handleTextChange}
-                className="w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422]"
+                data-align="center"
+                className={`w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422] ${isPdf ? "text-center" : ""}`}
               />
             </div>
           </div>
@@ -325,20 +341,29 @@ export function PlayerReflection({ isPdf, pdfPart }) {
               return (
                 <div key={metric} className="p-2 rounded-xl bg-black/25 border border-white/5 space-y-1">
                   <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-wider">
-                    <span className="text-white/80">{metric}</span>
-                    <span className="text-[#FF4422] font-black">{value}/10</span>
+                    <span className="text-white/80 leading-none">{metric}</span>
+                    <span className="text-[#FF4422] font-black leading-none">{value}/10</span>
                   </div>
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={value}
-                    onChange={(e) => handleMetricChange(metric, e.target.value)}
-                    className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-white/20 accent-[#FF4422]"
-                    style={{
-                      background: `linear-gradient(to right, #FF4422 0%, #FF4422 ${percent}%, rgba(255,255,255,0.15) ${percent}%, rgba(255,255,255,0.15) 100%)`,
-                    }}
-                  />
+                  {isPdf ? (
+                    <div className="w-full h-2 rounded-full bg-white/15 overflow-hidden">
+                      <div
+                        className="h-full bg-[#FF4422] rounded-full"
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+                  ) : (
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={value}
+                      onChange={(e) => handleMetricChange(metric, e.target.value)}
+                      className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-white/20 accent-[#FF4422]"
+                      style={{
+                        background: `linear-gradient(to right, #FF4422 0%, #FF4422 ${percent}%, rgba(255,255,255,0.15) ${percent}%, rgba(255,255,255,0.15) 100%)`,
+                      }}
+                    />
+                  )}
                 </div>
               );
             })}
@@ -346,15 +371,17 @@ export function PlayerReflection({ isPdf, pdfPart }) {
         </div>
       )}
       {/* ── Action Buttons Bar ── */}
-      <SectionActionBar
-        onReset={() => {
-          if (confirm("Reset Reflection data?")) {
-            localStorage.removeItem("playerReflection");
-            window.location.reload();
-          }
-        }}
-        sectionKey="reflection"
-      />
+      {!isPdf && (
+        <SectionActionBar
+          onReset={() => {
+            if (confirm("Reset Reflection data?")) {
+              localStorage.removeItem("playerReflection");
+              window.location.reload();
+            }
+          }}
+          sectionKey="reflection"
+        />
+      )}
 
     </div>
   );

@@ -59,7 +59,7 @@ export function SectionActionBar({ onReset, onSave, sectionKey }) {
   };
 
   return (
-    <div className="pt-2 pb-1 border-t border-white/10 space-y-1.5 relative">
+    <div data-action-bar="true" className="pt-2 pb-1 border-t border-white/10 space-y-1.5 relative">
       {savedToast && (
         <div className="px-3 py-1 rounded-lg bg-emerald-500 text-white font-black text-[10px] uppercase tracking-wider text-center animate-bounce shadow-md flex items-center justify-center gap-1">
           <Check size={12} />

@@ -319,14 +319,28 @@ export function FootballFormation({ isPdf = false }) {
   return (
     <div className="space-y-4 pb-4 select-none">
       {/* ── 1. Starting Lineup Header ── */}
-      <div className="flex items-center justify-between py-1">
-        <h2 className="text-xl font-black uppercase text-white tracking-wider">
-          STARTING LINEUP
-        </h2>
-        <span className="text-[10px] font-bold text-white/50 tracking-wider">
-          TACTICAL SHEET
-        </span>
-      </div>
+      {isPdf ? (
+        <div className="text-center pb-3 mb-2 border-b border-white/15">
+          <div className="text-[10px] font-black tracking-[0.25em] text-[#FF4422] uppercase">
+            FOOTBALLER ATHLETICS • TOUCHES
+          </div>
+          <h1 className="text-2xl font-black uppercase tracking-wider text-white mt-1">
+            STARTING LINEUP
+          </h1>
+          <p className="text-[10px] font-bold tracking-wider text-white/50 uppercase mt-0.5">
+            MATCHDAY TACTICAL SHEET
+          </p>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between py-1">
+          <h2 className="text-xl font-black uppercase text-white tracking-wider">
+            STARTING LINEUP
+          </h2>
+          <span className="text-[10px] font-bold text-white/50 tracking-wider">
+            TACTICAL SHEET
+          </span>
+        </div>
+      )}
 
       {/* ── 2. Match & Team Info Inputs ── */}
       <div className="p-3.5 rounded-2xl border border-white/10 bg-[#12151D] space-y-2.5">
@@ -340,7 +354,8 @@ export function FootballFormation({ isPdf = false }) {
               placeholder="Club Name"
               value={formData.teamName}
               onChange={(e) => handleInputChange("teamName", e.target.value)}
-              className="w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422]"
+              data-align="center"
+              className={`w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422] ${isPdf ? "text-center" : ""}`}
             />
           </div>
 
@@ -353,7 +368,8 @@ export function FootballFormation({ isPdf = false }) {
               placeholder="U16"
               value={formData.ageGroup}
               onChange={(e) => handleInputChange("ageGroup", e.target.value)}
-              className="w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422]"
+              data-align="center"
+              className={`w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422] ${isPdf ? "text-center" : ""}`}
             />
           </div>
         </div>
@@ -368,7 +384,8 @@ export function FootballFormation({ isPdf = false }) {
               placeholder="Date"
               value={formData.date}
               onChange={(e) => handleInputChange("date", e.target.value)}
-              className="w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422]"
+              data-align="center"
+              className={`w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422] ${isPdf ? "text-center" : ""}`}
             />
           </div>
 
@@ -381,7 +398,8 @@ export function FootballFormation({ isPdf = false }) {
               placeholder="Opponent"
               value={formData.opponent}
               onChange={(e) => handleInputChange("opponent", e.target.value)}
-              className="w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422]"
+              data-align="center"
+              className={`w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422] ${isPdf ? "text-center" : ""}`}
             />
           </div>
         </div>
@@ -520,6 +538,7 @@ export function FootballFormation({ isPdf = false }) {
                     onSlotChange={(idx, val) => handlePlayerSlotChange(pos.number, idx, val)}
                     isCompact={count >= 4}
                     isGk={pos.isGk}
+                    isPdf={isPdf}
                   />
                 ))}
               </div>
@@ -529,23 +548,25 @@ export function FootballFormation({ isPdf = false }) {
       </div>
 
       {/* ── Action Buttons Bar ── */}
-      <SectionActionBar
-        onReset={() => {
-          if (confirm("Reset Starting Lineup player names?")) {
-            const emptyPlayers = { 1: "", 2: "", 3: "", 4: "", 5: "", 6: "", 7: "", 8: "", 9: "", 10: "", 11: "" };
-            setFormData((prev) => ({ ...prev, players: emptyPlayers }));
-            localStorage.setItem("footballFormation", JSON.stringify({ ...formData, players: emptyPlayers }));
-            updateReflection({ formation: { ...formData, players: emptyPlayers } });
-          }
-        }}
-        onSave={() => updateReflection({ formation: formData })}
-        sectionKey="lineup"
-      />
+      {!isPdf && (
+        <SectionActionBar
+          onReset={() => {
+            if (confirm("Reset Starting Lineup player names?")) {
+              const emptyPlayers = { 1: "", 2: "", 3: "", 4: "", 5: "", 6: "", 7: "", 8: "", 9: "", 10: "", 11: "" };
+              setFormData((prev) => ({ ...prev, players: emptyPlayers }));
+              localStorage.setItem("footballFormation", JSON.stringify({ ...formData, players: emptyPlayers }));
+              updateReflection({ formation: { ...formData, players: emptyPlayers } });
+            }
+          }}
+          onSave={() => updateReflection({ formation: formData })}
+          sectionKey="lineup"
+        />
+      )}
     </div>
   );
 }
 
-function PositionCard({ pos, value, onSlotChange, isCompact = false, isGk = false }) {
+function PositionCard({ pos, value, onSlotChange, isCompact = false, isGk = false, isPdf = false }) {
   const slots = (value || ",,").split(",");
   const starter = slots[0] || "";
   const sub1 = slots[1] || "";
@@ -559,14 +580,14 @@ function PositionCard({ pos, value, onSlotChange, isCompact = false, isGk = fals
       <div className="flex items-center gap-1">
         <div className={`${
           isCompact ? "w-4 h-4 text-[8px]" : "w-5 h-5 text-[9px]"
-        } rounded-full flex items-center justify-center font-black border ${
+        } rounded-full flex items-center justify-center font-black border leading-none ${
           isGk ? "bg-amber-500 text-black border-white" : "bg-black text-white border-white/40"
         }`}>
           {pos.number}
         </div>
         <span className={`${
           isCompact ? "text-[8px] sm:text-[9px]" : "text-[9px]"
-        } font-black uppercase tracking-wider text-white truncate`}>
+        } font-black uppercase tracking-wider text-white truncate leading-none`}>
           {pos.label}
         </span>
       </div>
@@ -578,7 +599,8 @@ function PositionCard({ pos, value, onSlotChange, isCompact = false, isGk = fals
           placeholder="Starter"
           value={starter}
           onChange={(e) => onSlotChange(0, e.target.value)}
-          className={`w-full bg-white text-black font-bold rounded text-center border border-black/35 focus:outline-none focus:ring-1 focus:ring-[#FF4422] ${
+          data-align="center"
+          className={`w-full ${isPdf ? "bg-[#161A24] text-white border-white/20" : "bg-white text-black border-black/35"} font-bold rounded text-center border focus:outline-none focus:ring-1 focus:ring-[#FF4422] ${
             isCompact ? "px-1 py-0.5 text-[8px] sm:text-[9px]" : "px-1.5 py-1 text-[9px]"
           }`}
         />
@@ -588,7 +610,8 @@ function PositionCard({ pos, value, onSlotChange, isCompact = false, isGk = fals
           placeholder="Sub 1"
           value={sub1}
           onChange={(e) => onSlotChange(1, e.target.value)}
-          className={`w-full bg-[#EDEDED] text-black font-bold rounded text-center border border-black/30 focus:outline-none focus:ring-1 focus:ring-[#FF4422] ${
+          data-align="center"
+          className={`w-full ${isPdf ? "bg-black/50 text-white/90 border-white/15" : "bg-[#EDEDED] text-black border-black/30"} font-bold rounded text-center border focus:outline-none focus:ring-1 focus:ring-[#FF4422] ${
             isCompact ? "px-1 py-0.5 text-[8px] sm:text-[9px]" : "px-1.5 py-1 text-[9px]"
           }`}
         />
@@ -598,7 +621,8 @@ function PositionCard({ pos, value, onSlotChange, isCompact = false, isGk = fals
           placeholder="Sub 2"
           value={sub2}
           onChange={(e) => onSlotChange(2, e.target.value)}
-          className={`w-full bg-[#EDEDED] text-black font-bold rounded text-center border border-black/30 focus:outline-none focus:ring-1 focus:ring-[#FF4422] ${
+          data-align="center"
+          className={`w-full ${isPdf ? "bg-black/50 text-white/90 border-white/15" : "bg-[#EDEDED] text-black border-black/30"} font-bold rounded text-center border focus:outline-none focus:ring-1 focus:ring-[#FF4422] ${
             isCompact ? "px-1 py-0.5 text-[8px] sm:text-[9px]" : "px-1.5 py-1 text-[9px]"
           }`}
         />

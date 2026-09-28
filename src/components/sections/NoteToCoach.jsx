@@ -105,14 +105,28 @@ export function NoteToCoach({ isPdf, pdfPart }) {
   return (
     <div className="space-y-3 pb-1 select-none">
       {/* ── Title Bar ── */}
-      <div className="flex items-center justify-between py-1">
-        <h2 className="text-xl font-black uppercase text-white tracking-wider">
-          NOTE TO COACH
-        </h2>
-        <span className="text-[10px] font-bold text-white/50 tracking-wider">
-          FEEDBACK & REQUESTS
-        </span>
-      </div>
+      {isPdf ? (
+        <div className="text-center pb-3 mb-2 border-b border-white/15">
+          <div className="text-[10px] font-black tracking-[0.25em] text-[#FF4422] uppercase">
+            FOOTBALLER ATHLETICS • TOUCHES
+          </div>
+          <h1 className="text-2xl font-black uppercase tracking-wider text-white mt-1">
+            NOTE TO COACH
+          </h1>
+          <p className="text-[10px] font-bold tracking-wider text-white/50 uppercase mt-0.5">
+            DIRECT COACHING FEEDBACK & REQUESTS
+          </p>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between py-1">
+          <h2 className="text-xl font-black uppercase text-white tracking-wider">
+            NOTE TO COACH
+          </h2>
+          <span className="text-[10px] font-bold text-white/50 tracking-wider">
+            FEEDBACK & REQUESTS
+          </span>
+        </div>
+      )}
 
       {/* ── Date Badge Header ── */}
       <div className="p-3 rounded-2xl border border-white/10 bg-[#12151D] flex items-center justify-between">
@@ -129,7 +143,7 @@ export function NoteToCoach({ isPdf, pdfPart }) {
             </p>
           </div>
         </div>
-        <div className="text-[9px] font-bold text-white/60 bg-black/40 px-2.5 py-1 rounded-full border border-white/10">
+        <div className="text-[9px] font-bold text-white/60 bg-black/40 px-2.5 py-1 rounded-full border border-white/10 flex items-center justify-center leading-none">
           {formData.date || "Today"}
         </div>
       </div>
@@ -216,21 +230,30 @@ export function NoteToCoach({ isPdf, pdfPart }) {
             return (
               <div key={item.key} className="p-2.5 rounded-xl bg-black/25 border border-white/5 space-y-1">
                 <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider">
-                  <span className="text-white">{item.label}</span>
-                  <span className="text-[#FF4422] text-sm font-black">{val}</span>
+                  <span className="text-white leading-none">{item.label}</span>
+                  <span className="text-[#FF4422] text-sm font-black leading-none">{val}</span>
                 </div>
 
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value={val}
-                  onChange={(e) => handleGradeChange(item.key, e.target.value)}
-                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-white/20 accent-[#FF4422]"
-                  style={{
-                    background: `linear-gradient(to right, #FF4422 0%, #FF4422 ${percent}%, rgba(255,255,255,0.15) ${percent}%, rgba(255,255,255,0.15) 100%)`,
-                  }}
-                />
+                {isPdf ? (
+                  <div className="w-full h-2 rounded-full bg-white/15 overflow-hidden">
+                    <div
+                      className="h-full bg-[#FF4422] rounded-full"
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
+                ) : (
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={val}
+                    onChange={(e) => handleGradeChange(item.key, e.target.value)}
+                    className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-white/20 accent-[#FF4422]"
+                    style={{
+                      background: `linear-gradient(to right, #FF4422 0%, #FF4422 ${percent}%, rgba(255,255,255,0.15) ${percent}%, rgba(255,255,255,0.15) 100%)`,
+                    }}
+                  />
+                )}
               </div>
             );
           })}
@@ -238,11 +261,13 @@ export function NoteToCoach({ isPdf, pdfPart }) {
       </div>
 
       {/* ── Action Buttons Bar ── */}
-      <SectionActionBar
-        onReset={handleReset}
-        onSave={() => updateReflection({ noteToCoach: formData })}
-        sectionKey="note-to-coach"
-      />
+      {!isPdf && (
+        <SectionActionBar
+          onReset={handleReset}
+          onSave={() => updateReflection({ noteToCoach: formData })}
+          sectionKey="note-to-coach"
+        />
+      )}
     </div>
   );
 }

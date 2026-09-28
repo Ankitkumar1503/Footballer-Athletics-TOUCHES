@@ -421,30 +421,30 @@ function buildTouchCounterHtml({ stats, session, data, date, time }) {
 
       <div class="col">
         <div class="card-title">Live Ball Actions</div>
-        <div class="stat-row"><span class="stat-label">Passes</span><span class="stat-value">${currentStats.Pass || 0}</span></div>
-        <div class="stat-row"><span class="stat-label">Dribbles</span><span class="stat-value">${currentStats.Dribble || 0}</span></div>
-        <div class="stat-row"><span class="stat-label">Shots</span><span class="stat-value">${currentStats.Shot || 0}</span></div>
-        <div class="stat-row"><span class="stat-label">Goals Scored</span><span class="stat-value" style="color: #FACC15;">${currentStats.Goal || 0}</span></div>
-        <div class="stat-row"><span class="stat-label">Tackles Won</span><span class="stat-value">${currentStats.Tackle || 0}</span></div>
-        <div class="stat-row"><span class="stat-label">Headers</span><span class="stat-value">${currentStats.Header || 0}</span></div>
-        <div class="stat-row"><span class="stat-label">Corner Kicks</span><span class="stat-value">${currentStats['Corner Kick'] || 0}</span></div>
-        <div class="stat-row"><span class="stat-label">Free Kicks</span><span class="stat-value">${currentStats['Free Kick'] || 0}</span></div>
-        <div class="stat-row"><span class="stat-label">Throw-Ins</span><span class="stat-value">${currentStats['Throw-In'] || 0}</span></div>
+        <div class="stat-row"><span class="stat-label">Passes</span><span class="stat-value">${currentStats.Pass ?? 0}</span></div>
+        <div class="stat-row"><span class="stat-label">Dribbles</span><span class="stat-value">${currentStats.Dribble ?? 0}</span></div>
+        <div class="stat-row"><span class="stat-label">Shots</span><span class="stat-value">${currentStats.Shot ?? 0}</span></div>
+        <div class="stat-row"><span class="stat-label">Goals Scored</span><span class="stat-value" style="color: #FACC15;">${currentStats.Goal ?? 0}</span></div>
+        <div class="stat-row"><span class="stat-label">Tackles Won</span><span class="stat-value">${currentStats.Tackle ?? 0}</span></div>
+        <div class="stat-row"><span class="stat-label">Headers</span><span class="stat-value">${currentStats.Header ?? 0}</span></div>
+        <div class="stat-row"><span class="stat-label">Corner Kicks</span><span class="stat-value">${currentStats['Corner Kick'] ?? 0}</span></div>
+        <div class="stat-row"><span class="stat-label">Free Kicks</span><span class="stat-value">${currentStats['Free Kick'] ?? 0}</span></div>
+        <div class="stat-row"><span class="stat-label">Throw-Ins</span><span class="stat-value">${currentStats['Throw-In'] ?? 0}</span></div>
       </div>
     </div>
 
     <div class="card" style="margin-top: 14px;">
       <div class="card-title">Independent Match Events & Counters</div>
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Yellow Card</span><span class="stat-value" style="color: #FACC15;">${currentStats['Yellow Card'] || 0}</span></div>
-        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Red Card</span><span class="stat-value" style="color: #EF4444;">${currentStats['Red Card'] || 0}</span></div>
-        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Missed Game</span><span class="stat-value">${currentStats['Missed Game'] || 0}</span></div>
-        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Sub In</span><span class="stat-value">${currentStats['Sub In'] || 0}</span></div>
-        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Sub Out</span><span class="stat-value">${currentStats['Sub Out'] || 0}</span></div>
-        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Injury</span><span class="stat-value">${currentStats.Injury || 0}</span></div>
-        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Penalty</span><span class="stat-value">${currentStats.Penalty || currentStats['Penalty Kick'] || 0}</span></div>
-        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Keep-Up-Feet</span><span class="stat-value">${currentStats['Keep-Up-Feet'] || 0}</span></div>
-        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Keep-Up-Head</span><span class="stat-value">${currentStats['Keep-Up-Head'] || 0}</span></div>
+        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Yellow Card</span><span class="stat-value" style="color: #FACC15;">${currentStats['Yellow Card'] ?? 0}</span></div>
+        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Red Card</span><span class="stat-value" style="color: #EF4444;">${currentStats['Red Card'] ?? 0}</span></div>
+        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Missed Game</span><span class="stat-value">${currentStats['Missed Game'] ?? 0}</span></div>
+        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Sub In</span><span class="stat-value">${currentStats['Sub In'] ?? 0}</span></div>
+        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Sub Out</span><span class="stat-value">${currentStats['Sub Out'] ?? 0}</span></div>
+        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Injury</span><span class="stat-value">${currentStats.Injury ?? 0}</span></div>
+        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Penalty</span><span class="stat-value">${currentStats.Penalty ?? currentStats['Penalty Kick'] ?? 0}</span></div>
+        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Keep-Up-Feet</span><span class="stat-value">${currentStats['Keep-Up-Feet'] ?? 0}</span></div>
+        <div class="stat-row" style="padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 6px;"><span class="stat-label">Keep-Up-Head</span><span class="stat-value">${currentStats['Keep-Up-Head'] ?? 0}</span></div>
       </div>
     </div>
   `;
@@ -459,10 +459,12 @@ async function buildPlayerStatsHtml({ stats, session, data, profile, date }) {
     } catch (e) {}
   }
 
-  const careerTouches = career.totalTouches || (stats?.total ? stats.total * 3 : 150);
-  const yearsPlaying = career.totalYearsPlaying || profile?.totalYearsPlaying || session?.totalYearsPlaying || 5;
-  const hoursTrained = career.totalHoursTrained || profile?.totalHoursTrained || session?.totalHoursTrained || 120;
-  const gamesPlayed = career.totalGamesPlayed || 35;
+  const num = (v, fallback = 0) => (v !== undefined && v !== null && v !== '' ? v : fallback);
+
+  const careerTouches = num(career.totalTouches, stats?.total ?? 0);
+  const yearsPlaying = num(career.totalYearsPlaying, profile?.totalYearsPlaying ?? session?.totalYearsPlaying ?? 0);
+  const hoursTrained = num(career.totalHoursTrained, profile?.totalHoursTrained ?? session?.totalHoursTrained ?? 0);
+  const gamesPlayed = num(career.totalGames ?? career.totalGamesPlayed, 0);
 
   return `
     <div class="hero-stat">
@@ -476,36 +478,36 @@ async function buildPlayerStatsHtml({ stats, session, data, profile, date }) {
     <div class="grid">
       <div class="col">
         <div class="card-title">Career Technical Actions</div>
-        <div class="stat-row"><span class="stat-label">Total Passes</span><span class="stat-value">${career.totalPasses || 240}</span></div>
-        <div class="stat-row"><span class="stat-label">Total Dribbles</span><span class="stat-value">${career.totalDribbles || 180}</span></div>
-        <div class="stat-row"><span class="stat-label">Total Shots</span><span class="stat-value">${career.totalShots || 65}</span></div>
-        <div class="stat-row"><span class="stat-label">Shots on Target</span><span class="stat-value">${career.shotsOnTarget || 42}</span></div>
-        <div class="stat-row"><span class="stat-label">Total Goals</span><span class="stat-value" style="color: #FACC15;">${career.totalGoals || 18}</span></div>
-        <div class="stat-row"><span class="stat-label">Tackles Made</span><span class="stat-value">${career.tacklesMade || 45}</span></div>
-        <div class="stat-row"><span class="stat-label">Headers Won</span><span class="stat-value">${career.headers || 22}</span></div>
+        <div class="stat-row"><span class="stat-label">Total Passes</span><span class="stat-value">${num(career.totalPasses, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Total Dribbles</span><span class="stat-value">${num(career.totalDribbles, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Total Shots</span><span class="stat-value">${num(career.totalShots, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Shots on Target</span><span class="stat-value">${num(career.shotsOnTarget, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Total Goals</span><span class="stat-value" style="color: #FACC15;">${num(career.totalGoals, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Tackles Made</span><span class="stat-value">${num(career.tacklesMade, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Headers Won</span><span class="stat-value">${num(career.headers, 0)}</span></div>
       </div>
 
       <div class="col">
         <div class="card-title">Set Pieces & Match Events</div>
-        <div class="stat-row"><span class="stat-label">Corner Kicks</span><span class="stat-value">${career.totalCornerKicks || 15}</span></div>
-        <div class="stat-row"><span class="stat-label">Free Kicks</span><span class="stat-value">${career.freeKicks || 8}</span></div>
-        <div class="stat-row"><span class="stat-label">Throw-Ins</span><span class="stat-value">${career.totalThrowIns || 30}</span></div>
-        <div class="stat-row"><span class="stat-label">Penalties</span><span class="stat-value">${career.totalPenalties || 4}</span></div>
-        <div class="stat-row"><span class="stat-label">Yellow Cards</span><span class="stat-value">${career.yellowCards || 1}</span></div>
-        <div class="stat-row"><span class="stat-label">Red Cards</span><span class="stat-value">${career.redCards || 0}</span></div>
-        <div class="stat-row"><span class="stat-label">Sub In / Out</span><span class="stat-value">${career.subIn || 4} / ${career.subOut || 2}</span></div>
+        <div class="stat-row"><span class="stat-label">Corner Kicks</span><span class="stat-value">${num(career.totalCornerKicks, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Free Kicks</span><span class="stat-value">${num(career.freeKicks, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Throw-Ins</span><span class="stat-value">${num(career.totalThrowIns, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Penalties</span><span class="stat-value">${num(career.totalPenalties, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Yellow Cards</span><span class="stat-value">${num(career.yellowCards, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Red Cards</span><span class="stat-value">${num(career.redCards, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Sub In / Out</span><span class="stat-value">${num(career.subIn, 0)} / ${num(career.subOut, 0)}</span></div>
       </div>
     </div>
 
     <div class="grid">
       <div class="col">
         <div class="card-title">Player Development</div>
-        <div class="stat-row"><span class="stat-label">Years Playing</span><span class="stat-value">${career.totalYearsPlaying || yearsPlaying}</span></div>
-        <div class="stat-row"><span class="stat-label">Hours Trained</span><span class="stat-value">${career.totalHoursTrained || hoursTrained}</span></div>
-        <div class="stat-row"><span class="stat-label">Total Sessions</span><span class="stat-value">${career.totalSessions || stats?.totalSessions || 0}</span></div>
-        <div class="stat-row"><span class="stat-label">Recovery Days</span><span class="stat-value">${career.recoveryDays || 0}</span></div>
-        <div class="stat-row"><span class="stat-label">Keep-Up-Feet</span><span class="stat-value" style="color: #FACC15;">${career.keepUpFeet || 0}</span></div>
-        <div class="stat-row"><span class="stat-label">Keep-Up-Head</span><span class="stat-value" style="color: #FACC15;">${career.keepUpHead || 0}</span></div>
+        <div class="stat-row"><span class="stat-label">Years Playing</span><span class="stat-value">${yearsPlaying}</span></div>
+        <div class="stat-row"><span class="stat-label">Hours Trained</span><span class="stat-value">${hoursTrained}</span></div>
+        <div class="stat-row"><span class="stat-label">Total Sessions</span><span class="stat-value">${num(career.totalSessions, stats?.totalSessions ?? 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Recovery Days</span><span class="stat-value">${num(career.recoveryDays, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Keep-Up-Feet</span><span class="stat-value" style="color: #FACC15;">${num(career.keepUpFeet, 0)}</span></div>
+        <div class="stat-row"><span class="stat-label">Keep-Up-Head</span><span class="stat-value" style="color: #FACC15;">${num(career.keepUpHead, 0)}</span></div>
       </div>
     </div>
   `;

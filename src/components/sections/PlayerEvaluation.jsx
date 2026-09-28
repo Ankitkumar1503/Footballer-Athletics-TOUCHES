@@ -148,14 +148,28 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
       {(!isPdf || !pdfPart || pdfPart === 1) && (
         <>
           {/* Section Header */}
-          <div className="flex items-center justify-between py-1">
-            <h2 className="text-xl font-black uppercase text-white tracking-wider">
-              PLAYER EVALUATION
-            </h2>
-            <span className="text-[10px] font-bold text-white/50 tracking-wider">
-              COACH & PARENT GRADE
-            </span>
-          </div>
+          {isPdf ? (
+            <div className="text-center pb-3 mb-2 border-b border-white/15">
+              <div className="text-[10px] font-black tracking-[0.25em] text-[#FF4422] uppercase">
+                FOOTBALLER ATHLETICS • TOUCHES
+              </div>
+              <h1 className="text-2xl font-black uppercase tracking-wider text-white mt-1">
+                PLAYER EVALUATION
+              </h1>
+              <p className="text-[10px] font-bold tracking-wider text-white/50 uppercase mt-0.5">
+                COACH & PARENT PERFORMANCE EVALUATION
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between py-1">
+              <h2 className="text-xl font-black uppercase text-white tracking-wider">
+                PLAYER EVALUATION
+              </h2>
+              <span className="text-[10px] font-bold text-white/50 tracking-wider">
+                COACH & PARENT GRADE
+              </span>
+            </div>
+          )}
 
           {/* Player & Evaluator Info Inputs */}
           <div className="p-3.5 rounded-2xl border border-white/10 bg-[#12151D] space-y-2.5">
@@ -169,7 +183,8 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
                   placeholder="Player Name"
                   value={playerName}
                   onChange={handleNameChange}
-                  className="w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422]"
+                  data-align="center"
+                  className={`w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422] ${isPdf ? "text-center" : ""}`}
                 />
               </div>
 
@@ -182,7 +197,8 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
                   placeholder="Age"
                   value={playerAge}
                   onChange={handleAgeChange}
-                  className="w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422]"
+                  data-align="center"
+                  className={`w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422] ${isPdf ? "text-center" : ""}`}
                 />
               </div>
             </div>
@@ -196,7 +212,8 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
                 placeholder="Coach / Parent Name"
                 value={evaluatedBy}
                 onChange={handleEvaluatedByChange}
-                className="w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422]"
+                data-align="center"
+                className={`w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422] ${isPdf ? "text-center" : ""}`}
               />
             </div>
           </div>
@@ -253,13 +270,13 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
                             key={opt.value}
                             type="button"
                             onClick={() => handleRatingChange(category, skill, opt.value)}
-                            className={`py-1 px-2.5 rounded-lg text-[9px] font-black uppercase transition-all duration-150 flex items-center justify-center gap-1 ${
+                            className={`py-1 px-2.5 rounded-lg text-[9px] font-black uppercase transition-all duration-150 flex items-center justify-center leading-none ${
                               isSelected
                                 ? `${opt.color} shadow-md scale-[1.05]`
                                 : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10 hover:text-white"
                             }`}
                           >
-                            <span>{opt.value}</span>
+                            <span className="leading-none">{opt.value}</span>
                           </button>
                         );
                       })}
@@ -273,16 +290,18 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
       </div>
 
       {/* ── Action Buttons Bar ── */}
-      <SectionActionBar
-        onReset={() => {
-          if (confirm("Reset Evaluation data?")) {
-            setRatings({});
-            localStorage.removeItem("playerEvaluation");
-          }
-        }}
-        onSave={() => updateReflection({ detailedEvaluation: ratings })}
-        sectionKey="evaluation"
-      />
+      {!isPdf && (
+        <SectionActionBar
+          onReset={() => {
+            if (confirm("Reset Evaluation data?")) {
+              setRatings({});
+              localStorage.removeItem("playerEvaluation");
+            }
+          }}
+          onSave={() => updateReflection({ detailedEvaluation: ratings })}
+          sectionKey="evaluation"
+        />
+      )}
 
     </div>
   );

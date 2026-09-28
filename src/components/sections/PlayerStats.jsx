@@ -13,7 +13,7 @@ function useDebounce(value, delay) {
   return debouncedValue;
 }
 
-export function PlayerStats() {
+export function PlayerStats({ isPdf = false }) {
   const { session, updateSession } = useActiveSession();
   const cumulativeStats = useCumulativeStats();
 
@@ -31,6 +31,7 @@ export function PlayerStats() {
       activeFooter: "",
     };
     let career = {
+      totalTouches: "",
       totalYearsPlaying: "",
       totalHoursTrained: "",
       totalSessions: "",
@@ -89,6 +90,7 @@ export function PlayerStats() {
   useEffect(() => {
     const profileKeys = ["fullName", "dateOfBirth", "age", "cellPhone", "school", "academy", "club", "team", "position", "activeFooter"];
     const careerKeys = [
+      "totalTouches",
       "totalYearsPlaying",
       "totalHoursTrained",
       "totalSessions",
@@ -157,14 +159,24 @@ export function PlayerStats() {
     setFormData((prev) => ({ ...prev, activeFooter: foot }));
   };
 
+  const resolveValue = (formVal, cumulativeVal, fallback = 0) => {
+    if (formVal !== undefined && formVal !== null && formVal !== "") {
+      return formVal;
+    }
+    if (cumulativeVal !== undefined && cumulativeVal !== null && cumulativeVal !== "") {
+      return cumulativeVal;
+    }
+    return fallback;
+  };
+
   const playerName = formData.fullName || session?.playerName || "PLAYER";
   const activeFoot = (formData.activeFooter || session?.activeFooter || "RIGHT").toUpperCase();
   const isRightFoot = activeFoot === "RIGHT";
 
-  const liveTouches = cumulativeStats.totalTouches || 0;
-  const liveSessions = cumulativeStats.totalSessions || 0;
-  const liveGoals = cumulativeStats.totalGoals || 0;
-  const liveHours = cumulativeStats.totalHoursTrained || 0;
+  const liveTouches = resolveValue(formData.totalTouches, cumulativeStats.totalTouches, 0);
+  const liveSessions = resolveValue(formData.totalSessions, cumulativeStats.totalSessions, 0);
+  const liveGoals = resolveValue(formData.totalGoals, cumulativeStats.totalGoals, 0);
+  const liveHours = resolveValue(formData.totalHoursTrained, cumulativeStats.totalHoursTrained, 0);
 
   const todayStr = new Date().toLocaleDateString("en-US", {
     month: "short",
@@ -175,6 +187,7 @@ export function PlayerStats() {
   const handleSave = () => {
     const profileKeys = ["fullName", "dateOfBirth", "age", "cellPhone", "school", "academy", "club", "team", "position", "activeFooter"];
     const careerKeys = [
+      "totalTouches",
       "totalYearsPlaying",
       "totalHoursTrained",
       "totalSessions",
@@ -239,6 +252,7 @@ export function PlayerStats() {
       localStorage.removeItem("playerCareerStats");
       setFormData((prev) => ({
         ...prev,
+        totalTouches: "",
         totalYearsPlaying: "",
         totalHoursTrained: "",
         totalSessions: "",
@@ -275,16 +289,18 @@ export function PlayerStats() {
       </span>
       <div className="flex items-center justify-between gap-2 pt-1">
         <span className={`text-2xl font-black ${colorClass}`}>
-          {displayValue !== undefined && displayValue !== null ? displayValue : 0}
+          {displayValue !== undefined && displayValue !== null && displayValue !== "" ? displayValue : 0}
         </span>
-        <input
-          id={id}
-          type="number"
-          placeholder="0"
-          className="w-14 bg-black/40 text-xs font-bold text-center py-1 rounded-lg border border-white/15 text-white focus:border-white focus:outline-none transition-colors"
-          value={rawValue || ""}
-          onChange={handleChange}
-        />
+        {!isPdf && (
+          <input
+            id={id}
+            type="number"
+            placeholder="0"
+            className="w-14 bg-black/40 text-xs font-bold text-center py-1 rounded-lg border border-white/15 text-white focus:border-white focus:outline-none transition-colors"
+            value={rawValue !== undefined && rawValue !== null ? rawValue : ""}
+            onChange={handleChange}
+          />
+        )}
       </div>
     </div>
   );
@@ -443,7 +459,7 @@ export function PlayerStats() {
               TODAYS TOUCHES
             </span>
             <div className="text-3xl font-black text-white">
-              {cumulativeStats.todayTouches || 0}
+              {cumulativeStats.todayTouches !== undefined && cumulativeStats.todayTouches !== null ? cumulativeStats.todayTouches : 0}
             </div>
           </div>
 
@@ -452,7 +468,7 @@ export function PlayerStats() {
               TOUCHES THIS WEEK
             </span>
             <div className="text-3xl font-black text-white">
-              {cumulativeStats.weekTouches || 0}
+              {cumulativeStats.weekTouches !== undefined && cumulativeStats.weekTouches !== null ? cumulativeStats.weekTouches : 0}
             </div>
           </div>
 
@@ -461,7 +477,7 @@ export function PlayerStats() {
               TOUCHES THIS MONTH
             </span>
             <div className="text-3xl font-black text-white">
-              {cumulativeStats.monthTouches || 0}
+              {cumulativeStats.monthTouches !== undefined && cumulativeStats.monthTouches !== null ? cumulativeStats.monthTouches : 0}
             </div>
           </div>
 
@@ -482,68 +498,68 @@ export function PlayerStats() {
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white/70">
             CAREER TOTALS — TAP A NUMBER TO EDIT
           </h3>
-          <Edit2 size={12} className="text-white/40" />
+          {!isPdf && <Edit2 size={12} className="text-white/40" />}
         </div>
 
         <div className="grid grid-cols-2 gap-2.5">
           <StatCard
             id="totalTouches"
             label="TOTAL TOUCHES (LIFETIME)"
-            displayValue={cumulativeStats.totalTouches ?? liveTouches}
+            displayValue={resolveValue(formData.totalTouches, cumulativeStats.totalTouches ?? liveTouches)}
             rawValue={formData.totalTouches}
           />
           <StatCard
             id="totalGoals"
             label="GOALS SCORED"
-            displayValue={cumulativeStats.totalGoals || formData.totalGoals || 0}
+            displayValue={resolveValue(formData.totalGoals, cumulativeStats.totalGoals)}
             rawValue={formData.totalGoals}
           />
           <StatCard
             id="totalGames"
             label="TOTAL GAMES"
-            displayValue={cumulativeStats.totalGames || formData.totalGames || 0}
+            displayValue={resolveValue(formData.totalGames, cumulativeStats.totalGames)}
             rawValue={formData.totalGames}
           />
           <StatCard
             id="shotsOnTarget"
             label="SHOTS ON TARGET"
-            displayValue={cumulativeStats.shotsOnTarget || formData.shotsOnTarget || 0}
+            displayValue={resolveValue(formData.shotsOnTarget, cumulativeStats.shotsOnTarget)}
             rawValue={formData.shotsOnTarget}
           />
           <StatCard
             id="tacklesMade"
             label="TACKLES MADE"
-            displayValue={cumulativeStats.tacklesMade || formData.tacklesMade || 0}
+            displayValue={resolveValue(formData.tacklesMade, cumulativeStats.tacklesMade)}
             rawValue={formData.tacklesMade}
           />
           <StatCard
             id="totalPenalties"
             label="PENALTIES TAKEN"
-            displayValue={cumulativeStats.totalPenalties || formData.totalPenalties || 0}
+            displayValue={resolveValue(formData.totalPenalties, cumulativeStats.totalPenalties)}
             rawValue={formData.totalPenalties}
           />
           <StatCard
             id="totalCornerKicks"
             label="CORNER KICKS"
-            displayValue={cumulativeStats.totalCornerKicks || formData.totalCornerKicks || 0}
+            displayValue={resolveValue(formData.totalCornerKicks, cumulativeStats.totalCornerKicks)}
             rawValue={formData.totalCornerKicks}
           />
           <StatCard
             id="headers"
             label="HEADERS"
-            displayValue={cumulativeStats.headers || formData.headers || 0}
+            displayValue={resolveValue(formData.headers, cumulativeStats.headers)}
             rawValue={formData.headers}
           />
           <StatCard
             id="totalThrowIns"
             label="THROW-INS"
-            displayValue={cumulativeStats.totalThrowIns || formData.totalThrowIns || 0}
+            displayValue={resolveValue(formData.totalThrowIns, cumulativeStats.totalThrowIns)}
             rawValue={formData.totalThrowIns}
           />
           <StatCard
             id="freeKicks"
             label="FREE KICKS"
-            displayValue={cumulativeStats.freeKicks || formData.freeKicks || 0}
+            displayValue={resolveValue(formData.freeKicks, cumulativeStats.freeKicks)}
             rawValue={formData.freeKicks}
           />
         </div>
@@ -560,7 +576,7 @@ export function PlayerStats() {
           <StatCard
             id="yellowCards"
             label="YELLOW CARD"
-            displayValue={cumulativeStats.yellowCards || formData.yellowCards || 0}
+            displayValue={resolveValue(formData.yellowCards, cumulativeStats.yellowCards)}
             rawValue={formData.yellowCards}
             colorClass="text-yellow-400"
             isYellow={true}
@@ -568,7 +584,7 @@ export function PlayerStats() {
           <StatCard
             id="redCards"
             label="RED CARD"
-            displayValue={cumulativeStats.redCards || formData.redCards || 0}
+            displayValue={resolveValue(formData.redCards, cumulativeStats.redCards)}
             rawValue={formData.redCards}
             colorClass="text-rose-500"
           />
@@ -577,13 +593,13 @@ export function PlayerStats() {
           <StatCard
             id="subIn"
             label="SUB IN"
-            displayValue={cumulativeStats.subIn || formData.subIn || 0}
+            displayValue={resolveValue(formData.subIn, cumulativeStats.subIn)}
             rawValue={formData.subIn}
           />
           <StatCard
             id="subOut"
             label="SUB OUT"
-            displayValue={cumulativeStats.subOut || formData.subOut || 0}
+            displayValue={resolveValue(formData.subOut, cumulativeStats.subOut)}
             rawValue={formData.subOut}
           />
 
@@ -591,13 +607,13 @@ export function PlayerStats() {
           <StatCard
             id="injured"
             label="INJURED"
-            displayValue={cumulativeStats.injured || formData.injured || 0}
+            displayValue={resolveValue(formData.injured, cumulativeStats.injured)}
             rawValue={formData.injured}
           />
           <StatCard
             id="missedGames"
             label="MISSED GAME"
-            displayValue={cumulativeStats.missedGames || formData.missedGames || 0}
+            displayValue={resolveValue(formData.missedGames, cumulativeStats.missedGames)}
             rawValue={formData.missedGames}
           />
 
@@ -605,13 +621,13 @@ export function PlayerStats() {
           <StatCard
             id="totalYearsPlaying"
             label="YEARS PLAYING"
-            displayValue={formData.totalYearsPlaying || 0}
+            displayValue={resolveValue(formData.totalYearsPlaying, null)}
             rawValue={formData.totalYearsPlaying}
           />
           <StatCard
             id="totalHoursTrained"
             label="HOURS TRAINED"
-            displayValue={cumulativeStats.totalHoursTrained || liveHours || formData.totalHoursTrained || 0}
+            displayValue={resolveValue(formData.totalHoursTrained, cumulativeStats.totalHoursTrained ?? liveHours)}
             rawValue={formData.totalHoursTrained}
           />
 
@@ -619,13 +635,13 @@ export function PlayerStats() {
           <StatCard
             id="keepUpFeet"
             label="KEEP-UP-FEET"
-            displayValue={cumulativeStats.keepUpFeet || formData.keepUpFeet || 0}
+            displayValue={resolveValue(formData.keepUpFeet, cumulativeStats.keepUpFeet)}
             rawValue={formData.keepUpFeet}
           />
           <StatCard
             id="keepUpHead"
             label="KEEP-UP-HEAD"
-            displayValue={cumulativeStats.keepUpHead || formData.keepUpHead || 0}
+            displayValue={resolveValue(formData.keepUpHead, cumulativeStats.keepUpHead)}
             rawValue={formData.keepUpHead}
           />
 
@@ -633,24 +649,26 @@ export function PlayerStats() {
           <StatCard
             id="totalSessions"
             label="TOTAL SESSIONS"
-            displayValue={cumulativeStats.totalSessions || liveSessions || formData.totalSessions || 0}
+            displayValue={resolveValue(formData.totalSessions, cumulativeStats.totalSessions ?? liveSessions)}
             rawValue={formData.totalSessions}
           />
           <StatCard
             id="recoveryDays"
             label="RECOVERY DAYS"
-            displayValue={formData.recoveryDays || 0}
+            displayValue={resolveValue(formData.recoveryDays, null)}
             rawValue={formData.recoveryDays}
           />
         </div>
       </div>
 
       {/* ── Action Buttons Bar ── */}
-      <SectionActionBar
-        onSave={handleSave}
-        onReset={handleReset}
-        sectionKey="stats"
-      />
+      {!isPdf && (
+        <SectionActionBar
+          onSave={handleSave}
+          onReset={handleReset}
+          sectionKey="stats"
+        />
+      )}
     </div>
   );
 }

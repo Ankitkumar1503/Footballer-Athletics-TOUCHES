@@ -13,6 +13,7 @@ export function PlayerStats() {
 
   const [formData, setFormData] = useState({
     fullName: '',
+    totalTouches: '',
     totalYearsPlaying: '',
     totalHoursTrained: '',
     totalSessions: '',
@@ -55,6 +56,7 @@ export function PlayerStats() {
   }, []);
 
   const careerKeys = [
+    'totalTouches',
     'totalYearsPlaying',
     'totalHoursTrained',
     'totalSessions',
@@ -128,6 +130,7 @@ export function PlayerStats() {
               await AsyncStorage.removeItem('playerCareerStats');
               setFormData((prev) => ({
                 ...prev,
+                totalTouches: '',
                 totalYearsPlaying: '',
                 totalHoursTrained: '',
                 totalSessions: '',
@@ -163,14 +166,24 @@ export function PlayerStats() {
     handleChange('activeFooter', foot);
   };
 
+  const resolveValue = (formVal, cumulativeVal, fallback = 0) => {
+    if (formVal !== undefined && formVal !== null && formVal !== '') {
+      return formVal;
+    }
+    if (cumulativeVal !== undefined && cumulativeVal !== null && cumulativeVal !== '') {
+      return cumulativeVal;
+    }
+    return fallback;
+  };
+
   const playerName = formData.fullName || session?.playerName || 'PLAYER';
   const activeFoot = (formData.activeFooter || session?.activeFooter || 'RIGHT').toUpperCase();
   const isRightFoot = activeFoot === 'RIGHT';
 
-  const liveTouches = cumulativeStats.totalTouches || 0;
-  const liveSessions = cumulativeStats.totalSessions || 0;
-  const liveGoals = cumulativeStats.totalGoals || 0;
-  const liveHours = cumulativeStats.totalHoursTrained || 0;
+  const liveTouches = resolveValue(formData.totalTouches, cumulativeStats.totalTouches, 0);
+  const liveSessions = resolveValue(formData.totalSessions, cumulativeStats.totalSessions, 0);
+  const liveGoals = resolveValue(formData.totalGoals, cumulativeStats.totalGoals, 0);
+  const liveHours = resolveValue(formData.totalHoursTrained, cumulativeStats.totalHoursTrained, 0);
 
   const todayStr = new Date().toLocaleDateString('en-US', {
     month: 'short',
@@ -197,13 +210,13 @@ export function PlayerStats() {
           style={{ color: colorClass }}
           className="text-xl font-black"
         >
-          {displayValue !== undefined && displayValue !== null ? displayValue : 0}
+          {displayValue !== undefined && displayValue !== null && displayValue !== '' ? displayValue : 0}
         </Text>
         <TextInput
           placeholder="0"
           placeholderTextColor="rgba(255,255,255,0.3)"
           keyboardType="numeric"
-          value={rawValue ? String(rawValue) : ''}
+          value={rawValue !== undefined && rawValue !== null && rawValue !== '' ? String(rawValue) : ''}
           onChangeText={(val) => handleChange(id, val)}
           className="w-12 bg-black/40 text-xs font-bold text-center py-1 px-1 rounded-lg border border-white/15 text-white"
         />
@@ -428,13 +441,13 @@ export function PlayerStats() {
             {
               id: 'totalTouches',
               label: 'TOTAL TOUCHES (LIFETIME)',
-              displayValue: cumulativeStats.totalTouches ?? liveTouches,
+              displayValue: resolveValue(formData.totalTouches, cumulativeStats.totalTouches ?? liveTouches),
               rawValue: formData.totalTouches,
             },
             {
               id: 'totalGoals',
               label: 'GOALS SCORED',
-              displayValue: cumulativeStats.totalGoals || formData.totalGoals || 0,
+              displayValue: resolveValue(formData.totalGoals, cumulativeStats.totalGoals),
               rawValue: formData.totalGoals,
             },
           ],
@@ -442,13 +455,13 @@ export function PlayerStats() {
             {
               id: 'totalGames',
               label: 'TOTAL GAMES',
-              displayValue: cumulativeStats.totalGames || formData.totalGames || 0,
+              displayValue: resolveValue(formData.totalGames, cumulativeStats.totalGames),
               rawValue: formData.totalGames,
             },
             {
               id: 'shotsOnTarget',
               label: 'SHOTS ON TARGET',
-              displayValue: cumulativeStats.shotsOnTarget || formData.shotsOnTarget || 0,
+              displayValue: resolveValue(formData.shotsOnTarget, cumulativeStats.shotsOnTarget),
               rawValue: formData.shotsOnTarget,
             },
           ],
@@ -456,13 +469,13 @@ export function PlayerStats() {
             {
               id: 'tacklesMade',
               label: 'TACKLES MADE',
-              displayValue: cumulativeStats.tacklesMade || formData.tacklesMade || 0,
+              displayValue: resolveValue(formData.tacklesMade, cumulativeStats.tacklesMade),
               rawValue: formData.tacklesMade,
             },
             {
               id: 'totalPenalties',
               label: 'PENALTIES TAKEN',
-              displayValue: cumulativeStats.totalPenalties || formData.totalPenalties || 0,
+              displayValue: resolveValue(formData.totalPenalties, cumulativeStats.totalPenalties),
               rawValue: formData.totalPenalties,
             },
           ],
@@ -470,13 +483,13 @@ export function PlayerStats() {
             {
               id: 'totalCornerKicks',
               label: 'CORNER KICKS',
-              displayValue: cumulativeStats.totalCornerKicks || formData.totalCornerKicks || 0,
+              displayValue: resolveValue(formData.totalCornerKicks, cumulativeStats.totalCornerKicks),
               rawValue: formData.totalCornerKicks,
             },
             {
               id: 'totalThrowIns',
               label: 'THROW-INS',
-              displayValue: cumulativeStats.totalThrowIns || formData.totalThrowIns || 0,
+              displayValue: resolveValue(formData.totalThrowIns, cumulativeStats.totalThrowIns),
               rawValue: formData.totalThrowIns,
             },
           ],
@@ -484,13 +497,13 @@ export function PlayerStats() {
             {
               id: 'headers',
               label: 'HEADERS',
-              displayValue: cumulativeStats.headers || formData.headers || 0,
+              displayValue: resolveValue(formData.headers, cumulativeStats.headers),
               rawValue: formData.headers,
             },
             {
               id: 'freeKicks',
               label: 'FREE KICKS',
-              displayValue: cumulativeStats.freeKicks || formData.freeKicks || 0,
+              displayValue: resolveValue(formData.freeKicks, cumulativeStats.freeKicks),
               rawValue: formData.freeKicks,
             },
           ],
@@ -526,7 +539,7 @@ export function PlayerStats() {
             {
               id: 'yellowCards',
               label: 'YELLOW CARD',
-              displayValue: cumulativeStats.yellowCards || formData.yellowCards || 0,
+              displayValue: resolveValue(formData.yellowCards, cumulativeStats.yellowCards),
               rawValue: formData.yellowCards,
               colorClass: '#FACC15',
               isYellow: true,
@@ -534,7 +547,7 @@ export function PlayerStats() {
             {
               id: 'redCards',
               label: 'RED CARD',
-              displayValue: cumulativeStats.redCards || formData.redCards || 0,
+              displayValue: resolveValue(formData.redCards, cumulativeStats.redCards),
               rawValue: formData.redCards,
               colorClass: '#EF4444',
             },
@@ -544,13 +557,13 @@ export function PlayerStats() {
             {
               id: 'subIn',
               label: 'SUB IN',
-              displayValue: cumulativeStats.subIn || formData.subIn || 0,
+              displayValue: resolveValue(formData.subIn, cumulativeStats.subIn),
               rawValue: formData.subIn,
             },
             {
               id: 'subOut',
               label: 'SUB OUT',
-              displayValue: cumulativeStats.subOut || formData.subOut || 0,
+              displayValue: resolveValue(formData.subOut, cumulativeStats.subOut),
               rawValue: formData.subOut,
             },
           ],
@@ -559,13 +572,13 @@ export function PlayerStats() {
             {
               id: 'injured',
               label: 'INJURED',
-              displayValue: cumulativeStats.injured || formData.injured || 0,
+              displayValue: resolveValue(formData.injured, cumulativeStats.injured),
               rawValue: formData.injured,
             },
             {
               id: 'missedGames',
               label: 'MISSED GAME',
-              displayValue: cumulativeStats.missedGames || formData.missedGames || 0,
+              displayValue: resolveValue(formData.missedGames, cumulativeStats.missedGames),
               rawValue: formData.missedGames,
             },
           ],
@@ -574,13 +587,13 @@ export function PlayerStats() {
             {
               id: 'totalYearsPlaying',
               label: 'YEARS PLAYING',
-              displayValue: formData.totalYearsPlaying || 0,
+              displayValue: resolveValue(formData.totalYearsPlaying, null),
               rawValue: formData.totalYearsPlaying,
             },
             {
               id: 'totalHoursTrained',
               label: 'HOURS TRAINED',
-              displayValue: cumulativeStats.totalHoursTrained || liveHours || formData.totalHoursTrained || 0,
+              displayValue: resolveValue(formData.totalHoursTrained, cumulativeStats.totalHoursTrained ?? liveHours),
               rawValue: formData.totalHoursTrained,
             },
           ],
@@ -589,13 +602,13 @@ export function PlayerStats() {
             {
               id: 'keepUpFeet',
               label: 'KEEP-UP-FEET',
-              displayValue: cumulativeStats.keepUpFeet || formData.keepUpFeet || 0,
+              displayValue: resolveValue(formData.keepUpFeet, cumulativeStats.keepUpFeet),
               rawValue: formData.keepUpFeet,
             },
             {
               id: 'keepUpHead',
               label: 'KEEP-UP-HEAD',
-              displayValue: cumulativeStats.keepUpHead || formData.keepUpHead || 0,
+              displayValue: resolveValue(formData.keepUpHead, cumulativeStats.keepUpHead),
               rawValue: formData.keepUpHead,
             },
           ],
@@ -604,13 +617,13 @@ export function PlayerStats() {
             {
               id: 'totalSessions',
               label: 'TOTAL SESSIONS',
-              displayValue: cumulativeStats.totalSessions || liveSessions || formData.totalSessions || 0,
+              displayValue: resolveValue(formData.totalSessions, cumulativeStats.totalSessions ?? liveSessions),
               rawValue: formData.totalSessions,
             },
             {
               id: 'recoveryDays',
               label: 'RECOVERY DAYS',
-              displayValue: formData.recoveryDays || 0,
+              displayValue: resolveValue(formData.recoveryDays, null),
               rawValue: formData.recoveryDays,
             },
           ],
