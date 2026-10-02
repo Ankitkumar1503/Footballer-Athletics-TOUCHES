@@ -59,7 +59,22 @@ export function LiveStats({ isPdf }) {
   ];
 
   return (
-    <div className="space-y-3 pt-2">
+    <div className="space-y-3 pt-2 select-none">
+      {/* ── Standard Dark PDF Header ── */}
+      {isPdf && (
+        <div className="text-center pb-3 mb-2 border-b border-white/15">
+          <div className="text-[10px] font-black tracking-[0.25em] text-[#FF4422] uppercase">
+            FOOTBALLER ATHLETICS • TOUCHES
+          </div>
+          <h1 className="text-2xl font-black uppercase tracking-wider text-white mt-1">
+            TOUCH COUNTER
+          </h1>
+          <p className="text-[10px] font-bold tracking-wider text-white/50 uppercase mt-0.5">
+            SESSION TOUCH SUMMARY
+          </p>
+        </div>
+      )}
+
       {/* Player Information & Session Context */}
       <div className="p-3 rounded-xl border border-white/10 bg-[#12151D] space-y-2">
         <h4 className="text-[10px] font-black uppercase tracking-wider text-white/80">

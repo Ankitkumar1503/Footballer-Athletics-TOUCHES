@@ -229,20 +229,28 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
             }}
           >
             <div className="flex items-center gap-1.5 text-[9px] font-black uppercase" style={{ lineHeight: "1" }}>
-              <span data-legend-dot="true" className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" style={{ transform: isPdf ? "translateY(1.5px)" : "none", display: "inline-block" }} />
-              <span data-legend-text="true" className="text-emerald-400" style={{ transform: isPdf ? "translateY(-4px)" : "none", display: "inline-block", lineHeight: "1" }}>1 = Very Good</span>
+              <svg width="8" height="8" viewBox="0 0 8 8" data-legend-dot="true" className="shrink-0" style={{ display: "inline-block", verticalAlign: "middle" }}>
+                <circle cx="4" cy="4" r="3.5" fill="#34D399" />
+              </svg>
+              <span data-legend-text="true" className="text-emerald-400" style={{ display: "inline-block", verticalAlign: "middle", lineHeight: "1" }}>1 = Very Good</span>
             </div>
             <div className="flex items-center gap-1.5 text-[9px] font-black uppercase" style={{ lineHeight: "1" }}>
-              <span data-legend-dot="true" className="w-2 h-2 rounded-full bg-[#00AEEF] shrink-0" style={{ transform: isPdf ? "translateY(1.5px)" : "none", display: "inline-block" }} />
-              <span data-legend-text="true" className="text-[#00AEEF]" style={{ transform: isPdf ? "translateY(-4px)" : "none", display: "inline-block", lineHeight: "1" }}>2 = Good</span>
+              <svg width="8" height="8" viewBox="0 0 8 8" data-legend-dot="true" className="shrink-0" style={{ display: "inline-block", verticalAlign: "middle" }}>
+                <circle cx="4" cy="4" r="3.5" fill="#00AEEF" />
+              </svg>
+              <span data-legend-text="true" className="text-[#00AEEF]" style={{ display: "inline-block", verticalAlign: "middle", lineHeight: "1" }}>2 = Good</span>
             </div>
             <div className="flex items-center gap-1.5 text-[9px] font-black uppercase" style={{ lineHeight: "1" }}>
-              <span data-legend-dot="true" className="w-2 h-2 rounded-full bg-[#F59E0B] shrink-0" style={{ transform: isPdf ? "translateY(1.5px)" : "none", display: "inline-block" }} />
-              <span data-legend-text="true" className="text-[#F59E0B]" style={{ transform: isPdf ? "translateY(-4px)" : "none", display: "inline-block", lineHeight: "1" }}>3 = Average</span>
+              <svg width="8" height="8" viewBox="0 0 8 8" data-legend-dot="true" className="shrink-0" style={{ display: "inline-block", verticalAlign: "middle" }}>
+                <circle cx="4" cy="4" r="3.5" fill="#F59E0B" />
+              </svg>
+              <span data-legend-text="true" className="text-[#F59E0B]" style={{ display: "inline-block", verticalAlign: "middle", lineHeight: "1" }}>3 = Average</span>
             </div>
             <div className="flex items-center gap-1.5 text-[9px] font-black uppercase" style={{ lineHeight: "1" }}>
-              <span data-legend-dot="true" className="w-2 h-2 rounded-full bg-[#EF4444] shrink-0" style={{ transform: isPdf ? "translateY(1.5px)" : "none", display: "inline-block" }} />
-              <span data-legend-text="true" className="text-[#EF4444]" style={{ transform: isPdf ? "translateY(-4px)" : "none", display: "inline-block", lineHeight: "1" }}>4 = Poor</span>
+              <svg width="8" height="8" viewBox="0 0 8 8" data-legend-dot="true" className="shrink-0" style={{ display: "inline-block", verticalAlign: "middle" }}>
+                <circle cx="4" cy="4" r="3.5" fill="#EF4444" />
+              </svg>
+              <span data-legend-text="true" className="text-[#EF4444]" style={{ display: "inline-block", verticalAlign: "middle", lineHeight: "1" }}>4 = Poor</span>
             </div>
           </div>
         </>

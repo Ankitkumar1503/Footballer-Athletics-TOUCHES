@@ -18,6 +18,8 @@ const DARK_PDF_SECTIONS = new Set([
   "pdf-section-evaluation",
   "pdf-section-formation",
   "pdf-section-grade",
+  "pdf-section-touches",
+  "pdf-section-stats",
 ]);
 
 function prepareInputsForCapture(container, isDarkSection = false) {
@@ -536,13 +538,15 @@ export function PdfReportPage() {
 
             clonedDoc.querySelectorAll('[data-legend-dot="true"]').forEach((dot) => {
               dot.style.display = "inline-block";
-              dot.style.transform = "translateY(1.5px)";
+              dot.style.verticalAlign = "middle";
+              dot.style.transform = "none";
               dot.style.flexShrink = "0";
             });
 
             clonedDoc.querySelectorAll('[data-legend-text="true"]').forEach((txt) => {
               txt.style.display = "inline-block";
-              txt.style.transform = "translateY(-4px)";
+              txt.style.verticalAlign = "middle";
+              txt.style.transform = "none";
               txt.style.lineHeight = "1";
             });
           },
@@ -752,17 +756,17 @@ export function PdfReportPage() {
         {(renderAll || targetSectionId === "pdf-section-stats") && (
           <div
             id="pdf-section-stats"
-            style={{ ...lightThemeVars, background: "#fff", marginBottom: "8px", padding: "16px" }}
+            style={{ ...darkThemeVars, background: "#07090E", color: "#ffffff", marginBottom: "8px", padding: "20px" }}
           >
             <PlayerStats isPdf={true} />
           </div>
         )}
 
-        {/* TOTAL TOUCHES (Touch Counter - UNCHANGED!) */}
+        {/* TOTAL TOUCHES (Touch Counter) */}
         {(renderAll || targetSectionId === "pdf-section-touches") && (
           <div
             id="pdf-section-touches"
-            style={{ ...lightThemeVars, background: "#fff", marginBottom: "8px", padding: "16px" }}
+            style={{ ...darkThemeVars, background: "#07090E", color: "#ffffff", marginBottom: "8px", padding: "20px" }}
           >
             <LiveStats isPdf={true} />
           </div>

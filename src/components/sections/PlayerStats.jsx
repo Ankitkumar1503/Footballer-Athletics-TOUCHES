@@ -308,15 +308,29 @@ export function PlayerStats({ isPdf = false }) {
   return (
     <div className="space-y-4 pb-6">
       {/* ── Title Header ── */}
-      <div className="flex items-center justify-between py-1">
-        <h2 className="text-xl sm:text-2xl font-black uppercase text-white tracking-wider">
-          PLAYER STATS
-        </h2>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[9px] font-black uppercase">
-          <ShieldCheck size={12} />
-          <span>ON-DEVICE LIFETIME DATA</span>
+      {isPdf ? (
+        <div className="text-center pb-3 mb-2 border-b border-white/15">
+          <div className="text-[10px] font-black tracking-[0.25em] text-[#FF4422] uppercase">
+            FOOTBALLER ATHLETICS • TOUCHES
+          </div>
+          <h1 className="text-2xl font-black uppercase tracking-wider text-white mt-1">
+            PLAYER STATS
+          </h1>
+          <p className="text-[10px] font-bold tracking-wider text-white/50 uppercase mt-0.5">
+            LIFETIME PERFORMANCE & CAREER METRICS
+          </p>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center justify-between py-1">
+          <h2 className="text-xl sm:text-2xl font-black uppercase text-white tracking-wider">
+            PLAYER STATS
+          </h2>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[9px] font-black uppercase">
+            <ShieldCheck size={12} />
+            <span>ON-DEVICE LIFETIME DATA</span>
+          </div>
+        </div>
+      )}
 
       {/* ── GREEN STADIUM CARD ── */}
       <div className="relative rounded-2xl p-4 shadow-2xl overflow-hidden text-white space-y-3.5 border border-emerald-500/30 bg-gradient-to-b from-[#14532D] via-[#0F3E22] to-[#0A2916]">
