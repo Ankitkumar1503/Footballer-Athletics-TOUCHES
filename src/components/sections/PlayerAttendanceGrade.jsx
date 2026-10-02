@@ -164,12 +164,18 @@ export function PlayerAttendanceGrade({ isPdf, pdfPart }) {
       </div>
 
       {/* ── Grade Legend ── */}
-      <div className="p-2.5 rounded-xl border border-white/10 bg-black/30 flex items-center justify-around">
-        <span className="text-[9px] font-black uppercase text-white/60 leading-none">GRADE:</span>
-        <span className="text-[9px] font-black uppercase text-rose-400 leading-none">P = Poor</span>
-        <span className="text-[9px] font-black uppercase text-[#F59E0B] leading-none">A = Average</span>
-        <span className="text-[9px] font-black uppercase text-[#00AEEF] leading-none">G = Good</span>
-        <span className="text-[9px] font-black uppercase text-emerald-400 leading-none">VG = Very Good</span>
+      <div
+        data-legend-bar="true"
+        className="p-2.5 rounded-xl border border-white/10 bg-black/30 flex items-center justify-around"
+        style={{
+          lineHeight: "1",
+        }}
+      >
+        <span className="text-[9px] font-black uppercase text-white/60 leading-none" style={{ transform: isPdf ? "translateY(-2px)" : "none", display: "inline-block" }}>GRADE:</span>
+        <span className="text-[9px] font-black uppercase text-rose-400 leading-none" style={{ transform: isPdf ? "translateY(-2px)" : "none", display: "inline-block" }}>P = Poor</span>
+        <span className="text-[9px] font-black uppercase text-[#F59E0B] leading-none" style={{ transform: isPdf ? "translateY(-2px)" : "none", display: "inline-block" }}>A = Average</span>
+        <span className="text-[9px] font-black uppercase text-[#00AEEF] leading-none" style={{ transform: isPdf ? "translateY(-2px)" : "none", display: "inline-block" }}>G = Good</span>
+        <span className="text-[9px] font-black uppercase text-emerald-400 leading-none" style={{ transform: isPdf ? "translateY(-2px)" : "none", display: "inline-block" }}>VG = Very Good</span>
       </div>
 
       {/* ── Player Roster List ── */}
@@ -181,8 +187,19 @@ export function PlayerAttendanceGrade({ isPdf, pdfPart }) {
           >
             {/* Player Index Badge & Name Input */}
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <span className="w-6 h-6 rounded-lg bg-black/40 border border-white/15 text-white/70 flex items-center justify-center text-[10px] font-black flex-shrink-0 leading-none">
-                {idx + 1}
+              <span
+                data-roster-badge="true"
+                className="w-6 h-6 rounded-lg bg-black/40 border border-white/15 text-white/70 flex items-center justify-center text-[10px] font-black flex-shrink-0 leading-none"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  lineHeight: "1",
+                }}
+              >
+                <span style={{ display: "inline-block", transform: isPdf ? "translateY(-2.5px)" : "none", lineHeight: "1" }}>
+                  {idx + 1}
+                </span>
               </span>
               <input
                 type="text"
@@ -202,14 +219,23 @@ export function PlayerAttendanceGrade({ isPdf, pdfPart }) {
                   <button
                     key={opt.id}
                     type="button"
+                    data-grade-btn="true"
                     onClick={() => handleGradeSelect(player.id, opt.id)}
                     className={`w-7 h-7 rounded-lg text-[9px] font-black uppercase transition-all duration-150 flex items-center justify-center leading-none ${
                       isSelected
                         ? `${opt.color} shadow-md scale-105`
                         : "bg-black/30 text-white/40 border border-white/10 hover:bg-white/10 hover:text-white"
                     }`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      lineHeight: "1",
+                    }}
                   >
-                    {opt.label}
+                    <span style={{ display: "inline-block", transform: isPdf ? "translateY(-2.5px)" : "none", lineHeight: "1" }}>
+                      {opt.label}
+                    </span>
                   </button>
                 );
               })}

@@ -219,22 +219,30 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
           </div>
 
           {/* Rating Scale Legend */}
-          <div className="p-2.5 rounded-xl border border-white/10 bg-black/30 flex items-center justify-around">
-            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span className="text-emerald-400">1 = Very Good</span>
+          <div
+            data-legend-bar="true"
+            className="p-2.5 rounded-xl border border-white/10 bg-black/30 flex items-center justify-around"
+            style={{
+              lineHeight: "1",
+              paddingTop: isPdf ? "6px" : undefined,
+              paddingBottom: isPdf ? "6px" : undefined,
+            }}
+          >
+            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase" style={{ lineHeight: "1" }}>
+              <span data-legend-dot="true" className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" style={{ transform: isPdf ? "translateY(1.5px)" : "none", display: "inline-block" }} />
+              <span data-legend-text="true" className="text-emerald-400" style={{ transform: isPdf ? "translateY(-4px)" : "none", display: "inline-block", lineHeight: "1" }}>1 = Very Good</span>
             </div>
-            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase">
-              <span className="w-2 h-2 rounded-full bg-[#00AEEF]" />
-              <span className="text-[#00AEEF]">2 = Good</span>
+            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase" style={{ lineHeight: "1" }}>
+              <span data-legend-dot="true" className="w-2 h-2 rounded-full bg-[#00AEEF] shrink-0" style={{ transform: isPdf ? "translateY(1.5px)" : "none", display: "inline-block" }} />
+              <span data-legend-text="true" className="text-[#00AEEF]" style={{ transform: isPdf ? "translateY(-4px)" : "none", display: "inline-block", lineHeight: "1" }}>2 = Good</span>
             </div>
-            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase">
-              <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
-              <span className="text-[#F59E0B]">3 = Average</span>
+            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase" style={{ lineHeight: "1" }}>
+              <span data-legend-dot="true" className="w-2 h-2 rounded-full bg-[#F59E0B] shrink-0" style={{ transform: isPdf ? "translateY(1.5px)" : "none", display: "inline-block" }} />
+              <span data-legend-text="true" className="text-[#F59E0B]" style={{ transform: isPdf ? "translateY(-4px)" : "none", display: "inline-block", lineHeight: "1" }}>3 = Average</span>
             </div>
-            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase">
-              <span className="w-2 h-2 rounded-full bg-[#EF4444]" />
-              <span className="text-[#EF4444]">4 = Poor</span>
+            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase" style={{ lineHeight: "1" }}>
+              <span data-legend-dot="true" className="w-2 h-2 rounded-full bg-[#EF4444] shrink-0" style={{ transform: isPdf ? "translateY(1.5px)" : "none", display: "inline-block" }} />
+              <span data-legend-text="true" className="text-[#EF4444]" style={{ transform: isPdf ? "translateY(-4px)" : "none", display: "inline-block", lineHeight: "1" }}>4 = Poor</span>
             </div>
           </div>
         </>
@@ -257,7 +265,14 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
                     key={skill}
                     className="p-2 rounded-xl bg-black/25 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                   >
-                    <span className="text-[10px] font-bold text-white/90 uppercase tracking-wider">
+                    <span
+                      className="text-[10px] font-bold text-white/90 uppercase tracking-wider"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        transform: isPdf ? "translateY(-1.5px)" : "none",
+                      }}
+                    >
                       {skill}
                     </span>
 
@@ -269,14 +284,31 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
                           <button
                             key={opt.value}
                             type="button"
+                            data-eval-btn="true"
                             onClick={() => handleRatingChange(category, skill, opt.value)}
                             className={`py-1 px-2.5 rounded-lg text-[9px] font-black uppercase transition-all duration-150 flex items-center justify-center leading-none ${
                               isSelected
                                 ? `${opt.color} shadow-md scale-[1.05]`
                                 : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10 hover:text-white"
                             }`}
+                            style={{
+                              minWidth: "26px",
+                              height: "22px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              lineHeight: "1",
+                            }}
                           >
-                            <span className="leading-none">{opt.value}</span>
+                            <span
+                              style={{
+                                display: "inline-block",
+                                transform: isPdf ? "translateY(-2.5px)" : "none",
+                                lineHeight: "1",
+                              }}
+                            >
+                              {opt.value}
+                            </span>
                           </button>
                         );
                       })}

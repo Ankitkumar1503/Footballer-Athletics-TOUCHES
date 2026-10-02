@@ -522,10 +522,26 @@ export function FootballFormation({ isPdf = false }) {
           return (
             <div key={group.id} className="space-y-2">
               <div className="text-center">
-                <span className={`text-[10px] font-black uppercase tracking-[0.2em] bg-black/40 px-3 py-0.5 rounded-full border border-white/10 ${
-                  isGkGroup ? "text-amber-300" : "text-emerald-300"
-                }`}>
-                  {group.title}
+                <span
+                  data-tactical-title="true"
+                  className={`inline-flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] bg-black/40 px-3 py-1 rounded-full border border-white/10 ${
+                    isGkGroup ? "text-amber-300" : "text-emerald-300"
+                  }`}
+                  style={{
+                    lineHeight: "1",
+                    paddingTop: isPdf ? "0px" : undefined,
+                    paddingBottom: isPdf ? "0px" : undefined,
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      transform: isPdf ? "translateY(-5.5px)" : "none",
+                      lineHeight: "1",
+                    }}
+                  >
+                    {group.title}
+                  </span>
                 </span>
               </div>
 
@@ -572,22 +588,78 @@ function PositionCard({ pos, value, onSlotChange, isCompact = false, isGk = fals
   const sub1 = slots[1] || "";
   const sub2 = slots[2] || "";
 
+  const badgeSize = isCompact ? 18 : 20;
+  const radius = isCompact ? 8 : 9;
+  const center = badgeSize / 2;
+
   return (
     <div className={`rounded-xl bg-black/60 backdrop-blur-md border border-white/20 flex flex-col items-center space-y-1.5 ${
       isCompact ? "p-1.5" : "p-2"
     } ${isGk ? "border-amber-400/50" : ""}`}>
       {/* Position Header & Number Badge */}
-      <div className="flex items-center gap-1">
-        <div className={`${
-          isCompact ? "w-4 h-4 text-[8px]" : "w-5 h-5 text-[9px]"
-        } rounded-full flex items-center justify-center font-black border leading-none ${
-          isGk ? "bg-amber-500 text-black border-white" : "bg-black text-white border-white/40"
-        }`}>
-          {pos.number}
-        </div>
-        <span className={`${
-          isCompact ? "text-[8px] sm:text-[9px]" : "text-[9px]"
-        } font-black uppercase tracking-wider text-white truncate leading-none`}>
+      <div
+        data-position-header="true"
+        className="flex items-center justify-center gap-1.5 w-full py-1"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          lineHeight: "1",
+        }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={badgeSize}
+          height={badgeSize}
+          viewBox={`0 0 ${badgeSize} ${badgeSize}`}
+          className="shrink-0"
+          style={{
+            width: `${badgeSize}px`,
+            height: `${badgeSize}px`,
+            minWidth: `${badgeSize}px`,
+            minHeight: `${badgeSize}px`,
+            display: "inline-block",
+            verticalAlign: "middle",
+            transform: isPdf ? "translateY(1px)" : "none",
+          }}
+        >
+          <circle
+            cx={center}
+            cy={center}
+            r={radius}
+            fill={isGk ? "#f59e0b" : "#000000"}
+            stroke={isGk ? "#ffffff" : "rgba(255,255,255,0.7)"}
+            strokeWidth="1.5"
+          />
+          <text
+            x={center}
+            y={center}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill={isGk ? "#000000" : "#ffffff"}
+            fontSize={pos.number >= 10 ? (isCompact ? "8" : "9") : (isCompact ? "9.5" : "10.5")}
+            fontWeight="900"
+            fontFamily="Inter, system-ui, -apple-system, sans-serif"
+          >
+            {pos.number}
+          </text>
+        </svg>
+
+        <span
+          data-position-label="true"
+          className={`${
+            isCompact ? "text-[8.5px] sm:text-[9px]" : "text-[10px] sm:text-[11px]"
+          } font-black uppercase tracking-wider text-white whitespace-nowrap`}
+          style={{
+            overflow: "visible",
+            display: "inline-flex",
+            alignItems: "center",
+            verticalAlign: "middle",
+            lineHeight: "1",
+            transform: isPdf ? "translateY(-4.5px)" : "none",
+          }}
+        >
           {pos.label}
         </span>
       </div>

@@ -390,7 +390,6 @@ export function PdfReportPage() {
           scale: 2, // Higher scale for better text clarity
           useCORS: true,
           backgroundColor: isDarkSection ? "#07090E" : "#ffffff",
-          letterRendering: true,
           removeContainer: true, // Helps with layout shifting
           onclone: (clonedDoc) => {
             // Exclude action buttons completely from generated PDF
@@ -429,14 +428,123 @@ export function PdfReportPage() {
               }
             }
 
-            // Number badges fix - force white text on black circle
-            clonedDoc
-              .querySelectorAll(".football-field .bg-black span")
-              .forEach((span) => {
-                span.style.color = "#ffffff";
-                span.style.display = "block";
-                span.style.textAlign = "center";
-              });
+            // Starting Lineup tactical group title pills vertical centering fix
+            clonedDoc.querySelectorAll('[data-tactical-title="true"]').forEach((pill) => {
+              pill.style.display = "inline-flex";
+              pill.style.alignItems = "center";
+              pill.style.justifyContent = "center";
+              pill.style.paddingTop = "0px";
+              pill.style.paddingBottom = "0px";
+              pill.style.lineHeight = "1";
+              pill.style.overflow = "visible";
+              const inner = pill.querySelector("span");
+              if (inner) {
+                inner.style.display = "inline-block";
+                inner.style.transform = "translateY(-5.5px)";
+                inner.style.lineHeight = "1";
+              }
+            });
+
+            // Starting Lineup position card headers & badges alignment fix
+            clonedDoc.querySelectorAll('[data-position-header="true"]').forEach((hdr) => {
+              hdr.style.display = "flex";
+              hdr.style.alignItems = "center";
+              hdr.style.justifyContent = "center";
+              hdr.style.textAlign = "center";
+              hdr.style.overflow = "visible";
+            });
+
+            clonedDoc.querySelectorAll('[data-position-header="true"] svg').forEach((svg) => {
+              svg.style.display = "inline-block";
+              svg.style.verticalAlign = "middle";
+              svg.style.flexShrink = "0";
+              svg.style.transform = "translateY(1px)";
+            });
+
+            clonedDoc.querySelectorAll('[data-position-label="true"]').forEach((lblSpan) => {
+              lblSpan.style.display = "inline-flex";
+              lblSpan.style.alignItems = "center";
+              lblSpan.style.verticalAlign = "middle";
+              lblSpan.style.overflow = "visible";
+              lblSpan.style.lineHeight = "1";
+              lblSpan.style.whiteSpace = "nowrap";
+              lblSpan.style.color = "#ffffff";
+              lblSpan.style.transform = "translateY(-4.5px)";
+            });
+
+            // Team Roster index badges & grade buttons
+            clonedDoc.querySelectorAll('[data-roster-badge="true"]').forEach((b) => {
+              b.style.display = "flex";
+              b.style.alignItems = "center";
+              b.style.justifyContent = "center";
+              b.style.lineHeight = "1";
+              const s = b.querySelector("span");
+              if (s) {
+                s.style.display = "inline-block";
+                s.style.transform = "translateY(-2.5px)";
+                s.style.lineHeight = "1";
+              }
+            });
+
+            clonedDoc.querySelectorAll('[data-grade-btn="true"]').forEach((btn) => {
+              btn.style.display = "flex";
+              btn.style.alignItems = "center";
+              btn.style.justifyContent = "center";
+              btn.style.lineHeight = "1";
+              const s = btn.querySelector("span");
+              if (s) {
+                s.style.display = "inline-block";
+                s.style.transform = "translateY(-2.5px)";
+                s.style.lineHeight = "1";
+              }
+            });
+
+            // Player Evaluation rating buttons
+            clonedDoc.querySelectorAll('[data-eval-btn="true"]').forEach((btn) => {
+              btn.style.display = "flex";
+              btn.style.alignItems = "center";
+              btn.style.justifyContent = "center";
+              btn.style.lineHeight = "1";
+              const s = btn.querySelector("span");
+              if (s) {
+                s.style.display = "inline-block";
+                s.style.transform = "translateY(-2.5px)";
+                s.style.lineHeight = "1";
+              }
+            });
+
+            // Tag chips (Reflection & Note to Coach)
+            clonedDoc.querySelectorAll('[data-tag-chip="true"]').forEach((chip) => {
+              chip.style.display = "inline-flex";
+              chip.style.alignItems = "center";
+              chip.style.justifyContent = "center";
+              chip.style.lineHeight = "1";
+              const s = chip.querySelector("span");
+              if (s) {
+                s.style.display = "inline-block";
+                s.style.transform = "translateY(-2px)";
+                s.style.lineHeight = "1";
+              }
+            });
+
+            // Player Evaluation legend dots & text alignment fix
+            clonedDoc.querySelectorAll('[data-legend-bar="true"]').forEach((bar) => {
+              bar.style.paddingTop = "6px";
+              bar.style.paddingBottom = "6px";
+              bar.style.lineHeight = "1";
+            });
+
+            clonedDoc.querySelectorAll('[data-legend-dot="true"]').forEach((dot) => {
+              dot.style.display = "inline-block";
+              dot.style.transform = "translateY(1.5px)";
+              dot.style.flexShrink = "0";
+            });
+
+            clonedDoc.querySelectorAll('[data-legend-text="true"]').forEach((txt) => {
+              txt.style.display = "inline-block";
+              txt.style.transform = "translateY(-4px)";
+              txt.style.lineHeight = "1";
+            });
           },
         });
 

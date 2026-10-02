@@ -263,14 +263,29 @@ export function PlayerReflection({ isPdf, pdfPart }) {
                   <button
                     key={tag}
                     type="button"
+                    data-tag-chip="true"
                     onClick={() => handleTagToggle(tag)}
                     className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-200 ${
                       isSelected
                         ? "bg-[#FF4422] text-white border border-[#FF4422] shadow-md shadow-[#FF4422]/25 scale-[1.02]"
                         : "bg-black/30 text-white/60 border border-white/10 hover:border-white/20 hover:text-white"
                     }`}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      lineHeight: "1",
+                    }}
                   >
-                    {tag}
+                    <span
+                      style={{
+                        display: "inline-block",
+                        transform: isPdf ? "translateY(-2px)" : "none",
+                        lineHeight: "1",
+                      }}
+                    >
+                      {tag}
+                    </span>
                   </button>
                 );
               })}
@@ -341,8 +356,8 @@ export function PlayerReflection({ isPdf, pdfPart }) {
               return (
                 <div key={metric} className="p-2 rounded-xl bg-black/25 border border-white/5 space-y-1">
                   <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-wider">
-                    <span className="text-white/80 leading-none">{metric}</span>
-                    <span className="text-[#FF4422] font-black leading-none">{value}/10</span>
+                    <span className="text-white/80 leading-none" style={{ transform: isPdf ? "translateY(-1.5px)" : "none", display: "inline-block" }}>{metric}</span>
+                    <span className="text-[#FF4422] font-black leading-none" style={{ transform: isPdf ? "translateY(-1.5px)" : "none", display: "inline-block" }}>{value}/10</span>
                   </div>
                   {isPdf ? (
                     <div className="w-full h-2 rounded-full bg-white/15 overflow-hidden">

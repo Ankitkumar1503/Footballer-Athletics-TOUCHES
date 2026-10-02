@@ -143,8 +143,17 @@ export function NoteToCoach({ isPdf, pdfPart }) {
             </p>
           </div>
         </div>
-        <div className="text-[9px] font-bold text-white/60 bg-black/40 px-2.5 py-1 rounded-full border border-white/10 flex items-center justify-center leading-none">
-          {formData.date || "Today"}
+        <div
+          className="text-[9px] font-bold text-white/60 bg-black/40 px-2.5 py-1 rounded-full border border-white/10 flex items-center justify-center leading-none"
+          style={{
+            paddingTop: isPdf ? "0px" : undefined,
+            paddingBottom: isPdf ? "0px" : undefined,
+            lineHeight: "1",
+          }}
+        >
+          <span style={{ display: "inline-block", transform: isPdf ? "translateY(-2px)" : "none", lineHeight: "1" }}>
+            {formData.date || "Today"}
+          </span>
         </div>
       </div>
 
@@ -202,14 +211,29 @@ export function NoteToCoach({ isPdf, pdfPart }) {
               <button
                 key={tag}
                 type="button"
+                data-tag-chip="true"
                 onClick={() => handleTagToggle(tag)}
                 className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-200 ${
                   isSelected
                     ? "bg-[#10B981] text-white border border-[#10B981] shadow-md shadow-[#10B981]/25 scale-[1.02]"
                     : "bg-black/30 text-white/60 border border-white/10 hover:border-white/20 hover:text-white"
                 }`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  lineHeight: "1",
+                }}
               >
-                {tag}
+                <span
+                  style={{
+                    display: "inline-block",
+                    transform: isPdf ? "translateY(-2px)" : "none",
+                    lineHeight: "1",
+                  }}
+                >
+                  {tag}
+                </span>
               </button>
             );
           })}
@@ -230,8 +254,8 @@ export function NoteToCoach({ isPdf, pdfPart }) {
             return (
               <div key={item.key} className="p-2.5 rounded-xl bg-black/25 border border-white/5 space-y-1">
                 <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider">
-                  <span className="text-white leading-none">{item.label}</span>
-                  <span className="text-[#FF4422] text-sm font-black leading-none">{val}</span>
+                  <span className="text-white leading-none" style={{ transform: isPdf ? "translateY(-1.5px)" : "none", display: "inline-block" }}>{item.label}</span>
+                  <span className="text-[#FF4422] text-sm font-black leading-none" style={{ transform: isPdf ? "translateY(-1.5px)" : "none", display: "inline-block" }}>{val}</span>
                 </div>
 
                 {isPdf ? (
