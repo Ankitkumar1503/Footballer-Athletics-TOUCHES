@@ -81,6 +81,9 @@ export function parseVoiceCommand(text) {
   if (lower.includes("injury") || lower.includes("injured")) {
     return { type: "event", id: "Injury" };
   }
+  if (lower.includes("goal")) {
+    return { type: "event", id: "Goal" };
+  }
 
   // Quality specification
   let quality = null;
@@ -105,7 +108,6 @@ export function parseVoiceCommand(text) {
   if (lower.includes("pass")) actionId = "Pass";
   else if (lower.includes("dribble")) actionId = "Dribble";
   else if (lower.includes("shot") || lower.includes("shoot")) actionId = "Shot";
-  else if (lower.includes("goal")) actionId = "Goal";
   else if (lower.includes("header") || lower.includes("head")) actionId = "Header";
   else if (lower.includes("tackle")) actionId = "Tackle";
   else if (lower.includes("free kick") || lower.includes("freekick")) actionId = "Free Kick";
@@ -137,7 +139,7 @@ export function parseVoiceCommand(text) {
 export function ActionWheel() {
   const navigate = useNavigate();
   const { stats, sessionId, addTouch, removeTouch, updateSession } = useActiveSession();
-  const [selectedQuality, setSelectedQuality] = useState("Positive");
+  const [selectedQuality, setSelectedQuality] = useState(null);
   const [lastLoggedAction, setLastLoggedAction] = useState(null);
 
   // Voice Command States
@@ -234,7 +236,7 @@ export function ActionWheel() {
 
   const handleActionTap = async (actionId, overrideQuality = null) => {
     const isIndependent = [
-      "Penalty",
+      "Goal",
       "Keep-Up-Feet",
       "Keep-Up-Head",
       "Yellow Card",
@@ -245,7 +247,7 @@ export function ActionWheel() {
       "Injury",
     ].includes(actionId);
 
-    const quality = isIndependent ? "Event" : overrideQuality || selectedQuality;
+    const quality = isIndependent ? "Event" : (overrideQuality !== null ? overrideQuality : selectedQuality);
     await addTouch(actionId, quality);
     setLastLoggedAction({ action: actionId, quality });
     setTimeout(() => setLastLoggedAction(null), 1200);
@@ -381,6 +383,30 @@ export function ActionWheel() {
     }
   };
 
+  const recognitionRef = useRef(null);
+  const isExplicitlyActiveRef = useRef(false);
+  const lastProcessedTranscriptRef = useRef({ text: "", time: 0 });
+
+  const stopVoiceRecognition = () => {
+    isExplicitlyActiveRef.current = false;
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {}
+    }
+    setIsListening(false);
+    setVoiceFeedback({ type: "info", message: "Microphone stopped" });
+    setTimeout(() => setVoiceFeedback(null), 2000);
+  };
+
+  const toggleVoiceRecognition = () => {
+    if (isListening) {
+      stopVoiceRecognition();
+    } else {
+      startVoiceRecognition();
+    }
+  };
+
   const startVoiceRecognition = () => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -391,44 +417,101 @@ export function ActionWheel() {
     }
 
     try {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (e) {}
+      }
+
       const recognition = new SpeechRecognition();
-      recognition.continuous = false;
+      recognition.continuous = true;
       recognition.interimResults = false;
       recognition.lang = "en-US";
+      recognitionRef.current = recognition;
+      isExplicitlyActiveRef.current = true;
 
       recognition.onstart = () => {
         setIsListening(true);
         setVoiceFeedback({
           type: "listening",
-          message: "Listening... speak command (e.g. 'positive pass')",
+          message: "Listening continuously... speak commands (e.g. 'positive pass', 'goal')",
         });
       };
 
       recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
+        const lastIndex = event.results.length - 1;
+        const transcript = event.results[lastIndex][0]?.transcript?.trim();
+        if (!transcript) return;
+
+        // Prevent duplicate processing of the same speech result
+        const now = Date.now();
+        if (
+          transcript.toLowerCase() ===
+            lastProcessedTranscriptRef.current.text.toLowerCase() &&
+          now - lastProcessedTranscriptRef.current.time < 1200
+        ) {
+          return;
+        }
+        lastProcessedTranscriptRef.current = { text: transcript, time: now };
         processVoiceCommand(transcript);
       };
 
       recognition.onerror = (event) => {
-        setIsListening(false);
-        setVoiceFeedback({
-          type: "error",
-          message: `Mic: ${event.error || "error occurred"}`,
-        });
-        setTimeout(() => setVoiceFeedback(null), 3000);
+        if (event.error === "no-speech") {
+          return;
+        }
+        if (
+          event.error === "not-allowed" ||
+          event.error === "service-not-allowed"
+        ) {
+          isExplicitlyActiveRef.current = false;
+          setIsListening(false);
+          setVoiceFeedback({
+            type: "error",
+            message: "Microphone access denied. Please allow microphone in browser.",
+          });
+          setTimeout(() => setVoiceFeedback(null), 3500);
+          return;
+        }
+        console.warn("Speech recognition notice:", event.error);
       };
 
       recognition.onend = () => {
-        setIsListening(false);
+        // If listening was not explicitly turned off by the user, keep listening active
+        if (isExplicitlyActiveRef.current) {
+          try {
+            setTimeout(() => {
+              if (isExplicitlyActiveRef.current) {
+                recognition.start();
+              }
+            }, 250);
+          } catch (e) {
+            setIsListening(false);
+          }
+        } else {
+          setIsListening(false);
+        }
       };
 
       recognition.start();
     } catch (err) {
       console.error("Speech recognition error:", err);
+      isExplicitlyActiveRef.current = false;
       setIsListening(false);
       setIsVoiceModalOpen(true);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      isExplicitlyActiveRef.current = false;
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {}
+      }
+    };
+  }, []);
 
   const total = stats.total || 0;
   const positiveCount = stats.good || 0;
@@ -456,11 +539,11 @@ export function ActionWheel() {
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={startVoiceRecognition}
+            onClick={toggleVoiceRecognition}
             title={
               isListening
-                ? "Listening... speak now"
-                : "Voice Commands (e.g. 'positive pass', 'yellow card')"
+                ? "Listening... Click to stop"
+                : "Continuous Voice Commands (e.g. 'positive pass', 'yellow card')"
             }
             className={`p-2 rounded-xl border flex items-center gap-1.5 transition-all ${
               isListening
@@ -470,7 +553,7 @@ export function ActionWheel() {
           >
             <Mic size={16} className={isListening ? "animate-bounce" : ""} />
             <span className="text-[10px] font-black uppercase tracking-wider hidden sm:inline">
-              {isListening ? "Listening..." : "Voice"}
+              {isListening ? "Listening (Tap to stop)" : "Voice"}
             </span>
           </button>
         </div>
@@ -501,26 +584,22 @@ export function ActionWheel() {
       <div className="space-y-2 p-3 rounded-2xl border border-white/10 bg-[#0E121A]">
         {/* Row 1: PLAYER NAME & AGE */}
         <div className="grid grid-cols-2 gap-2.5">
-          <div className="space-y-1">
-            <label className="block text-[10px] font-black uppercase tracking-wider text-white/70">
-              PLAYER NAME
-            </label>
+          <div>
             <input
               type="text"
               placeholder="Enter player name"
+              aria-label="Player Name"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
               className="w-full bg-[#12151D] border border-white/10 rounded-xl px-3 py-2 text-white text-xs font-semibold focus:outline-none focus:border-white/40 placeholder:text-white/30"
             />
           </div>
 
-          <div className="space-y-1">
-            <label className="block text-[10px] font-black uppercase tracking-wider text-white/70">
-              AGE
-            </label>
+          <div>
             <input
               type="number"
               placeholder="Age"
+              aria-label="Age"
               value={age}
               onChange={(e) => setAge(e.target.value)}
               className="w-full bg-[#12151D] border border-white/10 rounded-xl px-3 py-2 text-white text-xs font-semibold focus:outline-none focus:border-white/40 placeholder:text-white/30"
@@ -530,12 +609,10 @@ export function ActionWheel() {
 
         {/* Row 2: PLAYER POSITION & NUMBER */}
         <div className="grid grid-cols-2 gap-2.5">
-          <div className="space-y-1">
-            <label className="block text-[10px] font-black uppercase tracking-wider text-white/70">
-              PLAYER POSITION
-            </label>
+          <div>
             <select
               value={position}
+              aria-label="Player Position"
               onChange={(e) => setPosition(e.target.value)}
               className="w-full bg-[#12151D] border border-white/10 rounded-xl px-2.5 py-2 text-white text-xs font-semibold focus:outline-none focus:border-white/40"
             >
@@ -547,13 +624,11 @@ export function ActionWheel() {
             </select>
           </div>
 
-          <div className="space-y-1">
-            <label className="block text-[10px] font-black uppercase tracking-wider text-white/70">
-              NUMBER
-            </label>
+          <div>
             <input
               type="number"
               placeholder="Jersey No."
+              aria-label="Jersey Number"
               value={playerNumber}
               onChange={(e) => setPlayerNumber(e.target.value)}
               className="w-full bg-[#12151D] border border-white/10 rounded-xl px-3 py-2 text-white text-xs font-semibold focus:outline-none focus:border-white/40 placeholder:text-white/30"
@@ -617,11 +692,8 @@ export function ActionWheel() {
           <span className="text-4xl sm:text-5xl font-black text-white tracking-tight drop-shadow-md">
             {total}
           </span>
-          <span className="text-[8px] font-black uppercase tracking-widest text-white/80">
+          <span className="text-[10px] font-black uppercase tracking-widest text-white/90">
             TOTAL TOUCHES
-          </span>
-          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white">
-            TOUCHES
           </span>
 
           {lastLoggedAction && (
@@ -653,7 +725,7 @@ export function ActionWheel() {
         <div className="grid grid-cols-2 gap-2.5">
           <button
             type="button"
-            onClick={() => setSelectedQuality("Positive")}
+            onClick={() => setSelectedQuality((prev) => (prev === "Positive" ? null : "Positive"))}
             className={`py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
               selectedQuality === "Positive"
                 ? "bg-[#10B981] text-white shadow-md shadow-emerald-500/25"
@@ -666,7 +738,7 @@ export function ActionWheel() {
 
           <button
             type="button"
-            onClick={() => setSelectedQuality("Negative")}
+            onClick={() => setSelectedQuality((prev) => (prev === "Negative" ? null : "Negative"))}
             className={`py-2 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
               selectedQuality === "Negative"
                 ? "bg-[#EF4444] text-white shadow-md shadow-rose-500/25"

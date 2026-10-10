@@ -152,7 +152,7 @@ export function PaymentSuccess() {
           </div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black tracking-widest uppercase">
             <ShieldCheck size={12} />
-            <span>Payment Verified • \$22 USD</span>
+            <span>Lifetime Access Active</span>
           </div>
           <h1 className="text-2xl font-black uppercase tracking-wider text-football-text">
             Welcome to <span className="text-football-accent text-glow">TOUCHES™</span>

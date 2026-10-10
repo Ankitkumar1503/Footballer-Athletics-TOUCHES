@@ -55,20 +55,86 @@ export function AiPlayerAgent() {
   const generateCoachResponse = (query) => {
     const q = query.toLowerCase();
 
+    // 1. Injury safety check
+    if (
+      q.includes('hurt') ||
+      q.includes('injur') ||
+      q.includes('pain') ||
+      q.includes('strain') ||
+      q.includes('tear') ||
+      q.includes('sprain') ||
+      q.includes('concussion') ||
+      q.includes('doctor')
+    ) {
+      return 'Important: If you feel pain or believe you might be injured, stop training or playing immediately. Rest and ice the area, and always inform your parents, coach, or consult a medical doctor or athletic trainer before returning to the pitch.';
+    }
+
+    // 2. Inappropriate topics exclusion
+    if (
+      q.includes('drug') ||
+      q.includes('alcohol') ||
+      q.includes('smoke') ||
+      q.includes('vape') ||
+      q.includes('weapon') ||
+      q.includes('sex') ||
+      q.includes('dating') ||
+      q.includes('gambl')
+    ) {
+      return 'As your football mentor, I focus strictly on football techniques, pitch skills, and athletic training. Please speak with a parent, guardian, or trusted adult regarding this topic.';
+    }
+
+    // 3. Politics and religion exclusion
+    if (
+      q.includes('politic') ||
+      q.includes('president') ||
+      q.includes('election') ||
+      q.includes('democrat') ||
+      q.includes('republican') ||
+      q.includes('religion') ||
+      q.includes('god') ||
+      q.includes('church') ||
+      q.includes('faith')
+    ) {
+      return "I'm dedicated exclusively to football coaching, athletic training, and match preparation. I don't engage in political or religious discussions. Let's focus on improving your touch and ball mastery!";
+    }
+
+    // 4. Healthy food & nutrition for athletes
+    if (
+      q.includes('eat') ||
+      q.includes('nutrition') ||
+      q.includes('food') ||
+      q.includes('diet') ||
+      q.includes('snack') ||
+      q.includes('breakfast') ||
+      q.includes('meal') ||
+      q.includes('water') ||
+      q.includes('hydrat')
+    ) {
+      return 'Clean nutrition powers elite performance! 3 to 4 hours before kickoff: Eat complex carbs and clean protein (like oatmeal with fruit & peanut butter, or brown rice with grilled chicken). 1 hour before match: Grab an easily digestible fruit like a banana. Stay thoroughly hydrated with water throughout the day, and avoid sugary sodas or heavy fried foods.';
+    }
+
+    // 5. Football fitness & speed
+    if (
+      q.includes('faster') ||
+      q.includes('speed') ||
+      q.includes('fitness') ||
+      q.includes('stamina') ||
+      q.includes('endurance') ||
+      q.includes('conditioning')
+    ) {
+      return 'Speed and fitness in football rely on explosive agility and high-intensity recovery! Practice 10-meter accelerations, boundary shuttle runs, and plyometric jump drills 2 to 3 times per week. Prioritize a thorough dynamic warm-up and get 8 to 10 hours of sleep for peak recovery.';
+    }
+
     if (q.includes('weak foot')) {
       return `Hey ${playerName}! To fix your weak foot, start doing 100 1-touch passes against a wall every single day with ONLY your non-dominant foot. Focus on ankle locking, keeping your hips square, and hitting the center of the ball. Within 2 weeks of daily wall work, your confidence will explode!`;
     }
-    if (q.includes('faster') || q.includes('speed')) {
-      return `Speed in football is all about acceleration over 5-15 meters and explosive footwork. Incorporate hill sprints, plyometric box jumps, and boundary acceleration drills 3x a week. Remember: drive your arms hard and stay on your toes!`;
-    }
-    if (q.includes('eat') || q.includes('nutrition') || q.includes('food')) {
-      return `3 to 4 hours before kickoff: Eat complex carbs + clean protein (like oatmeal with bananas & peanut butter, or rice with grilled chicken). 1 hour before: Grab a fast-digesting fruit like an apple or banana. Stay hydrated with electrolytes!`;
-    }
+
     if (q.includes('first touch') || q.includes('control')) {
-      return `Great first touch requires cushioning the ball like a feather! As the ball approaches, pull your foot back slightly at the exact moment of impact. Practice receiving wall passes on both feet while turning into open space.`;
+      return 'Great first touch requires cushioning the ball like a feather! As the ball approaches, pull your foot back slightly at the exact moment of impact. Practice receiving wall passes on both feet while turning into open space.';
     }
+
     if (q.includes('confidence') || q.includes('mindset') || q.includes('pressure')) {
-      return `Mindset separates good players from elite players! Visualize your successful passes and goals before the game. When you make a mistake, drop it instantly and focus on winning the next ball. You've put in the training!`;
+      return "Mindset separates good players from elite players! Visualize your successful passes and movements before the game. When you make a mistake, drop it instantly and focus on winning the next ball. You've put in the training!";
     }
 
     return `Coach Clem Murdock here! Focus on mastering the basics: crisp 1-touch passing, relentless off-the-ball movement, and sharp decision making under pressure. What specific part of your game would you like to work on today?`;
@@ -189,6 +255,32 @@ export function AiPlayerAgent() {
             New Chat
           </Text>
         </TouchableOpacity>
+      </View>
+
+      {/* ── REQUIRED CLIENT SAFETY DISCLAIMER ── */}
+      <View
+        style={{
+          paddingHorizontal: 12,
+          paddingVertical: 8,
+          borderRadius: 12,
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          borderColor: 'rgba(255, 255, 255, 0.1)',
+          borderWidth: 1,
+          marginBottom: 8,
+          alignItems: 'center',
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 9.5,
+            fontWeight: '600',
+            color: 'rgba(255, 255, 255, 0.75)',
+            textAlign: 'center',
+            lineHeight: 13,
+          }}
+        >
+          AI mentor for general football/soccer tips. Always follow your coaches, trainers, parents and medical professionals.
+        </Text>
       </View>
 
       {/* ── 2. QUICK SUGGESTIONS SCROLL ROW (Strictly constrained height) ── */}

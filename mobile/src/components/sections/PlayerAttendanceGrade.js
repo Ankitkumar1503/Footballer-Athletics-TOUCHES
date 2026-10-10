@@ -119,9 +119,6 @@ export function PlayerAttendanceGrade() {
       {/* ── Team & Date Header Inputs ── */}
       <View style={{ flexDirection: 'row', gap: 10 }} className="p-3.5 rounded-2xl border border-white/10 bg-[#12151D]">
         <View style={{ flex: 1 }}>
-          <Text className="text-[8.5px] font-black uppercase text-white/60 mb-1">
-            TEAM
-          </Text>
           <TextInput
             value={fullData.metadata.team}
             onChangeText={(val) => handleMetadataChange('team', val)}
@@ -131,9 +128,6 @@ export function PlayerAttendanceGrade() {
           />
         </View>
         <View style={{ flex: 1 }}>
-          <Text className="text-[8.5px] font-black uppercase text-white/60 mb-1">
-            DATE
-          </Text>
           <TextInput
             value={fullData.metadata.date}
             onChangeText={(val) => handleMetadataChange('date', val)}

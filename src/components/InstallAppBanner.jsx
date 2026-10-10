@@ -1,21 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { Download, Share, PlusSquare, X, Smartphone, Check, Compass } from "lucide-react";
+import {
+  Download,
+  Share,
+  PlusSquare,
+  X,
+  Smartphone,
+  Check,
+  Compass,
+} from "lucide-react";
 import { isMobileDevice } from "../lib/utils";
 
-let globalDeferredPrompt = typeof window !== "undefined" ? window.deferredInstallPrompt || null : null;
+let globalDeferredPrompt =
+  typeof window !== "undefined" ? window.deferredInstallPrompt || null : null;
 
 if (typeof window !== "undefined") {
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     globalDeferredPrompt = e;
     window.deferredInstallPrompt = e;
-    console.log("[PWA INSTALL] Global beforeinstallprompt event captured in InstallAppBanner listener!", e);
+    // console.log("[PWA INSTALL] Global beforeinstallprompt event captured in InstallAppBanner listener!", e);
     window.dispatchEvent(new CustomEvent("pwa-installable", { detail: e }));
   });
 }
 
 export function InstallAppBanner({ className = "" }) {
-  const [deferredPrompt, setDeferredPrompt] = useState(() => (typeof window !== "undefined" ? window.deferredInstallPrompt || globalDeferredPrompt : null));
+  const [deferredPrompt, setDeferredPrompt] = useState(() =>
+    typeof window !== "undefined"
+      ? window.deferredInstallPrompt || globalDeferredPrompt
+      : null,
+  );
   const [isMobile, setIsMobile] = useState(isMobileDevice);
   const [isIOS, setIsIOS] = useState(false);
   const [isNonSafariIOS, setIsNonSafariIOS] = useState(false);
@@ -68,7 +81,10 @@ export function InstallAppBanner({ className = "" }) {
     checkBrowser();
 
     const handleInstallable = (e) => {
-      console.log("[PWA INSTALL] InstallAppBanner received beforeinstallprompt/pwa-installable event:", e);
+      console.log(
+        "[PWA INSTALL] InstallAppBanner received beforeinstallprompt/pwa-installable event:",
+        e,
+      );
       if (e && e.preventDefault && e !== window) {
         e.preventDefault();
         globalDeferredPrompt = e;
@@ -81,7 +97,10 @@ export function InstallAppBanner({ className = "" }) {
     // Sync state if prompt was already captured prior to component mounting
     if (window.deferredInstallPrompt || globalDeferredPrompt) {
       const activePrompt = window.deferredInstallPrompt || globalDeferredPrompt;
-      console.log("[PWA INSTALL] InstallAppBanner mounted with pre-captured prompt:", activePrompt);
+      console.log(
+        "[PWA INSTALL] InstallAppBanner mounted with pre-captured prompt:",
+        activePrompt,
+      );
       setDeferredPrompt(activePrompt);
     }
 
@@ -107,11 +126,17 @@ export function InstallAppBanner({ className = "" }) {
   }, []);
 
   const handleInstallClick = async () => {
-    const promptEvent = deferredPrompt || window.deferredInstallPrompt || globalDeferredPrompt;
-    console.log("[PWA INSTALL] Install button clicked. deferredPrompt state:", promptEvent);
+    const promptEvent =
+      deferredPrompt || window.deferredInstallPrompt || globalDeferredPrompt;
+    console.log(
+      "[PWA INSTALL] Install button clicked. deferredPrompt state:",
+      promptEvent,
+    );
 
     if (!promptEvent) {
-      console.warn("[PWA INSTALL] Install button clicked but no deferredPrompt event is stored!");
+      console.warn(
+        "[PWA INSTALL] Install button clicked but no deferredPrompt event is stored!",
+      );
       return;
     }
 
@@ -119,7 +144,9 @@ export function InstallAppBanner({ className = "" }) {
       console.log("[PWA INSTALL] Triggering prompt()...");
       promptEvent.prompt();
       const choiceResult = await promptEvent.userChoice;
-      console.log(`[PWA INSTALL] User prompt choice outcome: ${choiceResult?.outcome}`);
+      console.log(
+        `[PWA INSTALL] User prompt choice outcome: ${choiceResult?.outcome}`,
+      );
       if (choiceResult?.outcome === "accepted") {
         setInstalledSuccess(true);
       }
@@ -139,7 +166,9 @@ export function InstallAppBanner({ className = "" }) {
 
   if (installedSuccess) {
     return (
-      <div className={`rounded-xl p-3 bg-emerald-950/80 border border-emerald-500/40 text-white flex items-center justify-between shadow-lg ${className}`}>
+      <div
+        className={`rounded-xl p-3 bg-emerald-950/80 border border-emerald-500/40 text-white flex items-center justify-between shadow-lg ${className}`}
+      >
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
             <Check size={18} />
@@ -166,7 +195,9 @@ export function InstallAppBanner({ className = "" }) {
   // 1. iOS + Non-Safari (e.g. Chrome / CriOS on iPhone)
   if (isIOS && isNonSafariIOS) {
     return (
-      <div className={`relative rounded-xl p-3.5 bg-gradient-to-r from-[#1E1711] via-[#1A1418] to-[#171220] border-2 border-amber-500/60 shadow-2xl text-white space-y-2.5 ${className}`}>
+      <div
+        className={`relative rounded-xl p-3.5 bg-gradient-to-r from-[#1E1711] via-[#1A1418] to-[#171220] border-2 border-amber-500/60 shadow-2xl text-white space-y-2.5 ${className}`}
+      >
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center flex-shrink-0 border border-amber-500/30">
@@ -192,11 +223,22 @@ export function InstallAppBanner({ className = "" }) {
 
         <div className="bg-black/50 border border-amber-500/20 rounded-lg p-2.5 text-[11px] text-white/90 font-medium space-y-1.5">
           <p className="text-white/90">
-            To install this app on iPhone, please open this link in <strong className="text-amber-400 font-bold">Safari</strong>:
+            To install this app on iPhone, please open this link in{" "}
+            <strong className="text-amber-400 font-bold">Safari</strong>:
           </p>
           <div className="text-[10px] text-white/80 space-y-1 pl-1">
-            <p>1. Tap the <strong className="text-white">...</strong> menu in Chrome → tap <strong className="text-amber-300">Open in Safari</strong> (or copy & paste URL into Safari).</p>
-            <p>2. In Safari, tap <strong className="text-[#00AEEF]">Share</strong> <Share size={11} className="inline text-[#00AEEF]" /> → <strong className="text-emerald-400">Add to Home Screen</strong>.</p>
+            <p>
+              1. Tap the <strong className="text-white">...</strong> menu in
+              Chrome → tap{" "}
+              <strong className="text-amber-300">Open in Safari</strong> (or
+              copy & paste URL into Safari).
+            </p>
+            <p>
+              2. In Safari, tap{" "}
+              <strong className="text-[#00AEEF]">Share</strong>{" "}
+              <Share size={11} className="inline text-[#00AEEF]" /> →{" "}
+              <strong className="text-emerald-400">Add to Home Screen</strong>.
+            </p>
           </div>
         </div>
       </div>
@@ -206,7 +248,9 @@ export function InstallAppBanner({ className = "" }) {
   // 2. iOS + Safari
   if (isIOS && !isNonSafariIOS) {
     return (
-      <div className={`relative rounded-xl p-3.5 bg-gradient-to-r from-[#141926] via-[#101420] to-[#171120] border-2 border-[#00AEEF]/50 shadow-xl text-white space-y-2 ${className}`}>
+      <div
+        className={`relative rounded-xl p-3.5 bg-gradient-to-r from-[#141926] via-[#101420] to-[#171120] border-2 border-[#00AEEF]/50 shadow-xl text-white space-y-2 ${className}`}
+      >
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-[#00AEEF]/20 text-[#00AEEF] flex items-center justify-center flex-shrink-0 border border-[#00AEEF]/30">
@@ -238,7 +282,8 @@ export function InstallAppBanner({ className = "" }) {
             </span>
             <span>→</span>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white/15 text-white font-bold text-[10px] border border-white/20">
-              <PlusSquare size={12} className="text-emerald-400" /> Add to Home Screen
+              <PlusSquare size={12} className="text-emerald-400" /> Add to Home
+              Screen
             </span>
           </p>
         </div>
@@ -248,7 +293,9 @@ export function InstallAppBanner({ className = "" }) {
 
   // 3. Android / Desktop Chrome / Edge Install Banner
   return (
-    <div className={`relative rounded-xl p-3.5 bg-gradient-to-r from-[#171424] via-[#121624] to-[#1E1119] border-2 border-[#FF4422]/60 shadow-2xl text-white space-y-2.5 ${className}`}>
+    <div
+      className={`relative rounded-xl p-3.5 bg-gradient-to-r from-[#171424] via-[#121624] to-[#1E1119] border-2 border-[#FF4422]/60 shadow-2xl text-white space-y-2.5 ${className}`}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-[#FF4422]/20 text-[#FF4422] flex items-center justify-center flex-shrink-0 border border-[#FF4422]/40 shadow-md">

@@ -82,20 +82,19 @@ export function useActiveSession() {
   // Calculate stats from touches (computed from touches array)
   const stats = useMemo(() => {
     const INDEPENDENT_EVENTS = [
+      'Goal',
       'Yellow Card',
       'Red Card',
       'Missed Game',
       'Sub In',
       'Sub Out',
       'Injury',
-      'Penalty',
-      'Penalty Kick',
       'Keep-Up-Feet',
       'Keep-Up-Head'
     ];
 
     const initialStats = {
-      total: 0, good: 0, bad: 0,
+      total: 0, good: 0, bad: 0, unrated: 0,
       Pass: 0, Dribble: 0, 'Corner Kick': 0, Header: 0, Tackle: 0,
       Goal: 0, Shot: 0, 'Free Kick': 0, 'Penalty Kick': 0, Penalty: 0, Cross: 0,
       'Yellow Card': 0, 'Red Card': 0, 'Goal Kick': 0, 'Throw-In': 0,
@@ -112,8 +111,13 @@ export function useActiveSession() {
 
       if (!isIndependent) {
         acc.total++;
-        if (touch.quality === 'Positive') acc.good++;
-        if (touch.quality === 'Negative') acc.bad++;
+        if (touch.quality === 'Positive') {
+          acc.good++;
+        } else if (touch.quality === 'Negative') {
+          acc.bad++;
+        } else {
+          acc.unrated++;
+        }
       }
 
       // Increment action count if it exists in our map, otherwise ignore or init

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../ui/Card";
 import { useActiveSession } from "../../hooks/useActiveSession";
+import { useAuth } from "../../contexts/AuthContext";
+import { registerPlayer } from "../../services/api";
 import touchesLogo from "../../assets/touches.png";
 import {
   ChevronDown,
@@ -54,7 +56,10 @@ const GAME_TYPES = ["GRASSROOTS", "4V4", "7V7", "9V9", "11V11"];
 export function PlayerProfile() {
   const navigate = useNavigate();
   const { session, updateSession } = useActiveSession();
+  const { completeRegistration } = useAuth();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
   const [showOptionalFields, setShowOptionalFields] = useState(false);
 
   const [formData, setFormData] = useState(() => {
@@ -91,6 +96,10 @@ export function PlayerProfile() {
       tiktok: "",
       facebook: "",
 
+      parentName: "",
+      parentEmail: "",
+      parentConsentChecked: false,
+
       favoriteTeam: "",
       favoritePlayer: "",
 
@@ -114,7 +123,9 @@ export function PlayerProfile() {
     };
 
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("playerProfile");
+      const saved =
+        localStorage.getItem("playerProfile") ||
+        localStorage.getItem("playerProfile_draft");
       if (saved) {
         try {
           return { ...defaultState, ...JSON.parse(saved) };
@@ -127,7 +138,7 @@ export function PlayerProfile() {
   });
 
   useEffect(() => {
-    localStorage.setItem("playerProfile", JSON.stringify(formData));
+    localStorage.setItem("playerProfile_draft", JSON.stringify(formData));
   }, [formData]);
 
   useEffect(() => {
@@ -204,8 +215,12 @@ export function PlayerProfile() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const isUnder13 = formData.age !== "" && parseInt(formData.age, 10) < 13;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage(null);
+
     if (!formData.activeFooter) {
       const element = document.getElementById("foot-selection-section");
       if (element) {
@@ -213,8 +228,74 @@ export function PlayerProfile() {
       }
       return;
     }
-    localStorage.setItem("playerProfile", JSON.stringify(formData));
-    navigate("/dashboard");
+
+    const name = (formData.fullName || formData.playerName || "").trim();
+    if (!name) {
+      alert("Please enter your name before continuing.");
+      return;
+    }
+
+    if (formData.email && formData.email.trim() && !formData.email.includes("@")) {
+      alert("Please enter a valid email address or leave it blank.");
+      return;
+    }
+
+    if (isUnder13) {
+      if (
+        !formData.parentName?.trim() ||
+        !formData.parentEmail?.trim() ||
+        !formData.parentConsentChecked
+      ) {
+        alert(
+          "Parent or legal guardian consent is required for players under 13. Please complete the Parent / Guardian Consent section."
+        );
+        const elem = document.getElementById("parent-consent-section");
+        if (elem) elem.scrollIntoView({ behavior: "smooth" });
+        return;
+      }
+    }
+
+    const cleanedData = {
+      ...formData,
+      ...(isUnder13 ? { cellPhone: "", instagram: "", tiktok: "", facebook: "" } : {}),
+      parentConsent: isUnder13
+        ? {
+            parentName: formData.parentName.trim(),
+            parentEmail: formData.parentEmail.trim(),
+            consentedAt: new Date().toISOString(),
+            verified: true,
+          }
+        : null,
+    };
+
+    setIsSubmitting(true);
+    try {
+      // 1. Submit to the live backend API
+      const result = await registerPlayer(cleanedData);
+
+      const token = result?.token;
+      const backendData = result?.data || result?.player;
+
+      // 2. Persist local registration state & AuthContext
+      completeRegistration(cleanedData, token, backendData);
+
+      if (session?.id) {
+        await updateSession(cleanedData);
+      }
+
+      localStorage.removeItem("playerProfile_draft");
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Registration submission error:", error);
+      const serverMessage =
+        error?.data?.message ||
+        error?.message ||
+        "Registration could not be completed. Please check your connection.";
+      setErrorMessage(serverMessage);
+      alert(serverMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const isLeftSelected = formData.activeFooter === "LEFT";
@@ -476,19 +557,97 @@ export function PlayerProfile() {
               </div>
             </div>
 
+            {/* Parent/Guardian Consent Step (Required for Under 13) */}
+            {isUnder13 && (
+              <div
+                id="parent-consent-section"
+                className="p-3.5 rounded-xl bg-[#1C1824] border-2 border-amber-500/40 space-y-3"
+              >
+                <div className="space-y-0.5">
+                  <h4 className="text-[11px] font-black uppercase text-amber-400 tracking-wider">
+                    Parent / Legal Guardian Consent Required
+                  </h4>
+                  <p className="text-[9.5px] text-white/70 leading-relaxed">
+                    Players under 13 require parental or legal guardian consent before registering. Please have your parent or guardian complete this section.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <div>
+                    <label htmlFor="parentName" className={labelClass}>
+                      PARENT / GUARDIAN FULL NAME *
+                    </label>
+                    <input
+                      id="parentName"
+                      type="text"
+                      placeholder="Parent / Guardian Name"
+                      className={inputClass}
+                      value={formData.parentName || ""}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="parentEmail" className={labelClass}>
+                      PARENT / GUARDIAN EMAIL ADDRESS *
+                    </label>
+                    <input
+                      id="parentEmail"
+                      type="email"
+                      placeholder="parent.guardian@email.com"
+                      className={inputClass}
+                      value={formData.parentEmail || ""}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <label className="flex items-start gap-2 pt-1 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      id="parentConsentChecked"
+                      checked={!!formData.parentConsentChecked}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          parentConsentChecked: e.target.checked,
+                        }))
+                      }
+                      className="mt-0.5 w-4 h-4 rounded border-white/20 bg-black/40 text-football-accent focus:ring-0 cursor-pointer"
+                    />
+                    <span className="text-[9px] text-white/80 font-medium leading-tight">
+                      I am the parent or legal guardian of this player. I authorize my child to create a TOUCHES player profile and track football training statistics.
+                    </span>
+                  </label>
+                </div>
+              </div>
+            )}
+
             {/* Submit / Action Button */}
             <div className="pt-1">
+              {errorMessage && (
+                <div className="p-3 mb-2 rounded-xl bg-red-950/80 border border-red-500/50 text-red-200 text-xs font-medium">
+                  {errorMessage}
+                </div>
+              )}
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className={`w-full py-3 px-5 rounded-xl font-black text-xs uppercase tracking-widest transition-all duration-200 flex items-center justify-center gap-2 shadow-lg ${
-                  !formData.activeFooter
+                  isSubmitting
+                    ? "opacity-60 cursor-not-allowed bg-gray-700 text-white"
+                    : !formData.activeFooter
                     ? "bg-[#3D1A15] border border-[#FF4422]/40 text-[#FF6B35] hover:bg-[#4D201A] cursor-pointer"
                     : formData.activeFooter === "LEFT"
                       ? "bg-[#FF4422] text-white hover:bg-[#FF6B35] shadow-[#FF4422]/30 cursor-pointer scale-[1.01]"
                       : "bg-[#00AEEF] text-white hover:bg-[#38BDF8] shadow-[#00AEEF]/30 cursor-pointer scale-[1.01]"
                 }`}
               >
-                {!formData.activeFooter ? (
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>REGISTERING PLAYER...</span>
+                  </>
+                ) : !formData.activeFooter ? (
                   <>
                     <span>CHOOSE YOUR FOOT FIRST</span>
                     <ArrowUp size={15} className="animate-bounce" />
@@ -522,11 +681,11 @@ export function PlayerProfile() {
 
             {showOptionalFields && (
               <div className="mt-3 space-y-2.5 pt-1 text-xs">
-                {/* Contact & Socials */}
+                {/* Contact & Socials (Minimizing for Under 13) */}
                 <div className="grid grid-cols-2 gap-2.5">
-                  <div>
+                  <div className={isUnder13 ? "col-span-2" : ""}>
                     <label htmlFor="email" className={labelClass}>
-                      EMAIL
+                      {isUnder13 ? "PARENT CONTACT EMAIL" : "EMAIL"}
                     </label>
                     <input
                       id="email"
@@ -537,49 +696,53 @@ export function PlayerProfile() {
                       onChange={handleChange}
                     />
                   </div>
-                  <div>
-                    <label htmlFor="cellPhone" className={labelClass}>
-                      PHONE
-                    </label>
-                    <input
-                      id="cellPhone"
-                      type="tel"
-                      placeholder="Phone number"
-                      className={inputClass}
-                      value={formData.cellPhone}
-                      onChange={handleChange}
-                    />
-                  </div>
+                  {!isUnder13 && (
+                    <div>
+                      <label htmlFor="cellPhone" className={labelClass}>
+                        PHONE
+                      </label>
+                      <input
+                        id="cellPhone"
+                        type="tel"
+                        placeholder="Phone number"
+                        className={inputClass}
+                        value={formData.cellPhone}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div>
-                    <label htmlFor="instagram" className={labelClass}>
-                      INSTAGRAM
-                    </label>
-                    <input
-                      id="instagram"
-                      type="text"
-                      placeholder="@handle"
-                      className={inputClass}
-                      value={formData.instagram}
-                      onChange={handleChange}
-                    />
+                {!isUnder13 && (
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div>
+                      <label htmlFor="instagram" className={labelClass}>
+                        INSTAGRAM
+                      </label>
+                      <input
+                        id="instagram"
+                        type="text"
+                        placeholder="@handle"
+                        className={inputClass}
+                        value={formData.instagram}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="tiktok" className={labelClass}>
+                        TIKTOK
+                      </label>
+                      <input
+                        id="tiktok"
+                        type="text"
+                        placeholder="@handle"
+                        className={inputClass}
+                        value={formData.tiktok}
+                        onChange={handleChange}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label htmlFor="tiktok" className={labelClass}>
-                      TIKTOK
-                    </label>
-                    <input
-                      id="tiktok"
-                      type="text"
-                      placeholder="@handle"
-                      className={inputClass}
-                      value={formData.tiktok}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
+                )}
 
                 {/* Favorites & Game Types */}
                 <div className="grid grid-cols-2 gap-2.5">

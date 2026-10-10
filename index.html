@@ -17,7 +17,7 @@
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       window.deferredInstallPrompt = e;
-      console.log('[PWA INSTALL] Global beforeinstallprompt event captured!', e);
+      // console.log('[PWA INSTALL] Global beforeinstallprompt event captured!', e);
       window.dispatchEvent(new CustomEvent('pwa-installable', { detail: e }));
     });
   </script>

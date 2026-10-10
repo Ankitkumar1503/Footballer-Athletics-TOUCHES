@@ -26,75 +26,25 @@ import {
 
 export function PlayerDashboard() {
   const navigate = useNavigate();
-  const { session } = useActiveSession();
+  const { session, updateSession } = useActiveSession();
   const { user } = useAuth();
   const cumulativeStats = useCumulativeStats();
 
   const [currentTimeStr, setCurrentTimeStr] = useState("");
-  const [registryStats, setRegistryStats] = useState({
-    totalOnline: 32064,
-    leftCount: 12847,
-    rightCount: 19204,
-    leftPercent: 40,
-    rightPercent: 60,
-  });
+  const [, setForceUpdate] = useState(0);
 
-  useEffect(() => {
-    let isMounted = true;
-    async function loadLiveRegistry() {
-      try {
-        const allSessions = await db.sessions.toArray();
-        let leftDbCount = 0;
-        let rightDbCount = 0;
+  const handleSelectSide = (foot) => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("playerProfile") || "{}");
+      saved.activeFooter = foot;
+      localStorage.setItem("playerProfile", JSON.stringify(saved));
+    } catch (e) {}
 
-        allSessions.forEach((s) => {
-          if ((s.activeFooter || s.footer || "").toUpperCase() === "LEFT") {
-            leftDbCount++;
-          } else {
-            rightDbCount++;
-          }
-        });
-
-        let savedProfile = {};
-        try {
-          savedProfile = JSON.parse(localStorage.getItem("playerProfile") || "{}");
-        } catch (e) {}
-
-        const userFoot = (
-          savedProfile.activeFooter ||
-          session.activeFooter ||
-          "RIGHT"
-        ).toUpperCase();
-
-        if (userFoot === "LEFT") leftDbCount++;
-        else rightDbCount++;
-
-        const baseLeft = 12840 + leftDbCount;
-        const baseRight = 19200 + rightDbCount;
-        const total = baseLeft + baseRight;
-
-        const leftPct = Math.round((baseLeft / total) * 100);
-        const rightPct = 100 - leftPct;
-
-        if (isMounted) {
-          setRegistryStats({
-            totalOnline: total,
-            leftCount: baseLeft,
-            rightCount: baseRight,
-            leftPercent: leftPct,
-            rightPercent: rightPct,
-          });
-        }
-      } catch (err) {
-        console.error("Error loading live registry DB stats:", err);
-      }
+    if (session?.id && updateSession) {
+      updateSession({ activeFooter: foot });
     }
-
-    loadLiveRegistry();
-    return () => {
-      isMounted = false;
-    };
-  }, [session.activeFooter, session.id]);
+    setForceUpdate((prev) => prev + 1);
+  };
 
   useEffect(() => {
     const updateTime = () => {
@@ -248,75 +198,63 @@ export function PlayerDashboard() {
           </div>
         </div>
 
-        {/* LIVE REGISTRY & FOOTERS BREAKDOWN BLOCK (Circled in yellow in reference image) */}
-        <div className="relative z-10 bg-black/45 backdrop-blur-md border border-white/15 rounded-xl p-3 sm:p-3.5 space-y-2.5 shadow-lg">
-          {/* Live Registry Title */}
-          <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-            <span>FOOTBALLER ATHLETICS CLUB – LIVE REGISTRY</span>
-          </div>
-
-          {/* Players Online Now */}
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              {registryStats.totalOnline.toLocaleString()}
-            </span>
-            <span className="text-[9px] font-black uppercase tracking-wider text-white/70">
-              PLAYERS ONLINE NOW
+        {/* PICK YOUR SIDE CARD (Client Requested) */}
+        <div className="relative z-10 bg-black/45 backdrop-blur-md border border-white/15 rounded-xl p-3 sm:p-3.5 space-y-3 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>FOOTBALLER ATHLETICS CLUB • REGISTRY</span>
+            </div>
+            <span className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 text-white/80">
+              {isRightFoot ? "Right Foot Dominant" : "Left Foot Dominant"}
             </span>
           </div>
 
-          {/* Left vs Right Footers Stats */}
-          <div className="flex items-center justify-between pt-1">
-            <div>
-              <div className="text-lg sm:text-xl font-black text-[#FF4422]">
-                {registryStats.leftCount.toLocaleString()}
-              </div>
-              <div className="text-[8px] font-black uppercase tracking-wider text-[#FF4422]">
-                LEFT FOOTERS
-              </div>
-            </div>
-
-            <div className="text-right">
-              <div className="text-lg sm:text-xl font-black text-[#00AEEF]">
-                {registryStats.rightCount.toLocaleString()}
-              </div>
-              <div className="text-[8px] font-black uppercase tracking-wider text-[#00AEEF]">
-                RIGHT FOOTERS
-              </div>
-            </div>
+          <div>
+            <h3 className="text-lg font-black uppercase tracking-wide text-white">
+              Pick Your Side
+            </h3>
+            <p className="text-[10px] text-white/70 font-semibold">
+              Are you a Left or Right Footer? Choose your dominant foot for training & match tracking.
+            </p>
           </div>
 
-          {/* Progress Bar */}
-          <div className="space-y-1">
-            <div className="w-full h-2 bg-black/50 rounded-full overflow-hidden flex">
-              <div
-                className="h-full bg-[#FF4422] transition-all duration-500"
-                style={{ width: `${registryStats.leftPercent}%` }}
-              />
-              <div
-                className="h-full bg-[#00AEEF] transition-all duration-500"
-                style={{ width: `${registryStats.rightPercent}%` }}
-              />
-            </div>
+          {/* Interactive Foot Buttons */}
+          <div className="grid grid-cols-2 gap-2.5 pt-0.5">
+            <button
+              type="button"
+              onClick={() => handleSelectSide("LEFT")}
+              className={`py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 border ${
+                activeFoot === "LEFT"
+                  ? "bg-[#FF4422] text-white border-[#FF4422] shadow-lg shadow-[#FF4422]/20"
+                  : "bg-black/40 text-white/70 hover:bg-black/60 border-white/15"
+              }`}
+            >
+              <div className="w-5 h-5 rounded-full border border-white flex items-center justify-center p-0.5">
+                <img src="/left_foot.png" alt="Left" className="w-full h-full object-contain brightness-0 invert" />
+              </div>
+              <span>LEFT FOOTER</span>
+            </button>
 
-            <div className="flex justify-between text-[9px] font-semibold text-white/70">
-              <span>{registryStats.leftPercent}% Left</span>
-              <span>{registryStats.rightPercent}% Right</span>
-            </div>
+            <button
+              type="button"
+              onClick={() => handleSelectSide("RIGHT")}
+              className={`py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 border ${
+                activeFoot === "RIGHT"
+                  ? "bg-[#00AEEF] text-white border-[#00AEEF] shadow-lg shadow-[#00AEEF]/20"
+                  : "bg-black/40 text-white/70 hover:bg-black/60 border-white/15"
+              }`}
+            >
+              <div className="w-5 h-5 rounded-full border border-white flex items-center justify-center p-0.5">
+                <img src="/right_foot.png" alt="Right" className="w-full h-full object-contain brightness-0 invert" />
+              </div>
+              <span>RIGHT FOOTER</span>
+            </button>
           </div>
 
-          {/* Community Tagline */}
-          <div className="flex items-center gap-1 text-[8px] font-black uppercase tracking-wider text-[#00AEEF] pt-1">
+          <div className="flex items-center gap-1.5 text-[8.5px] font-bold text-white/60 pt-0.5 border-t border-white/10">
             <Zap size={11} className="text-yellow-400 flex-shrink-0" />
-            <span>
-              YOU ARE 1 OF{" "}
-              {(isRightFoot
-                ? registryStats.rightCount
-                : registryStats.leftCount
-              ).toLocaleString()}{" "}
-              {isRightFoot ? "RIGHT" : "LEFT"} FOOTERS IN THE TOUCHES™ COMMUNITY
-            </span>
+            <span>Active Selection: <span className={isRightFoot ? "text-[#00AEEF] font-black" : "text-[#FF4422] font-black"}>{isRightFoot ? "RIGHT FOOTER" : "LEFT FOOTER"}</span></span>
           </div>
         </div>
       </div>
@@ -409,7 +347,7 @@ export function PlayerDashboard() {
                 Player Passport
               </h3>
               <p className="text-[9px] text-white/60 font-medium">
-                Verified athlete ID
+                Your player ID
               </p>
             </div>
           </button>

@@ -346,12 +346,10 @@ export function FootballFormation({ isPdf = false }) {
       <div className="p-3.5 rounded-2xl border border-white/10 bg-[#12151D] space-y-2.5">
         <div className="grid grid-cols-2 gap-2.5">
           <div>
-            <label className="block text-[9px] font-black uppercase tracking-wider text-white/60 mb-1">
-              TEAM
-            </label>
             <input
               type="text"
               placeholder="Club Name"
+              aria-label="Team Name"
               value={formData.teamName}
               onChange={(e) => handleInputChange("teamName", e.target.value)}
               data-align="center"
@@ -360,12 +358,10 @@ export function FootballFormation({ isPdf = false }) {
           </div>
 
           <div>
-            <label className="block text-[9px] font-black uppercase tracking-wider text-white/60 mb-1">
-              AGE GROUP
-            </label>
             <input
               type="text"
-              placeholder="U16"
+              placeholder="Age Group"
+              aria-label="Age Group"
               value={formData.ageGroup}
               onChange={(e) => handleInputChange("ageGroup", e.target.value)}
               data-align="center"
@@ -376,12 +372,10 @@ export function FootballFormation({ isPdf = false }) {
 
         <div className="grid grid-cols-2 gap-2.5">
           <div>
-            <label className="block text-[9px] font-black uppercase tracking-wider text-white/60 mb-1">
-              DATE
-            </label>
             <input
               type="text"
               placeholder="Date"
+              aria-label="Date"
               value={formData.date}
               onChange={(e) => handleInputChange("date", e.target.value)}
               data-align="center"
@@ -390,12 +384,10 @@ export function FootballFormation({ isPdf = false }) {
           </div>
 
           <div>
-            <label className="block text-[9px] font-black uppercase tracking-wider text-white/60 mb-1">
-              OPPONENT
-            </label>
             <input
               type="text"
               placeholder="Opponent"
+              aria-label="Opponent"
               value={formData.opponent}
               onChange={(e) => handleInputChange("opponent", e.target.value)}
               data-align="center"

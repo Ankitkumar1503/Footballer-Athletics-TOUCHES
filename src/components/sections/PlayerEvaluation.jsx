@@ -29,7 +29,6 @@ const EVALUATION_CATEGORIES = {
   ],
   "CO-ORDINATION": [
     "Orientation",
-    "Endurance",
     "Rhythm",
     "Differentiation",
     "Reaction",
@@ -175,12 +174,10 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
           <div className="p-3.5 rounded-2xl border border-white/10 bg-[#12151D] space-y-2.5">
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-[9px] font-black uppercase tracking-wider text-white/60 mb-1">
-                  PLAYER NAME
-                </label>
                 <input
                   type="text"
                   placeholder="Player Name"
+                  aria-label="Player Name"
                   value={playerName}
                   onChange={handleNameChange}
                   data-align="center"
@@ -189,12 +186,10 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
               </div>
 
               <div>
-                <label className="block text-[9px] font-black uppercase tracking-wider text-white/60 mb-1">
-                  AGE
-                </label>
                 <input
                   type="number"
                   placeholder="Age"
+                  aria-label="Age"
                   value={playerAge}
                   onChange={handleAgeChange}
                   data-align="center"
@@ -204,12 +199,10 @@ export function PlayerEvaluation({ isPdf, pdfPart }) {
             </div>
 
             <div>
-              <label className="block text-[9px] font-black uppercase tracking-wider text-white/60 mb-1">
-                EVALUATION BY
-              </label>
               <input
                 type="text"
                 placeholder="Coach / Parent Name"
+                aria-label="Evaluation By"
                 value={evaluatedBy}
                 onChange={handleEvaluatedByChange}
                 data-align="center"

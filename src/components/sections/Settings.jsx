@@ -22,7 +22,12 @@ import {
   ChevronDown,
   ChevronUp,
   X,
+  UserX,
+  Download,
+  Upload,
 } from "lucide-react";
+import { db } from "../../lib/db";
+import { deleteAccount } from "../../services/api";
 
 // ── Shared label style matching PlayerProfile ──
 const sectionHeaderClass =
@@ -157,19 +162,258 @@ export function Settings() {
   const navigate = useNavigate();
   const [modal, setModal] = useState(null); // { type: 'page' | 'all' }
   const [showFaq, setShowFaq] = useState(false);
+  const [deleteAccountModal, setDeleteAccountModal] = useState(false);
 
   const handleResetPage = () => setModal("page");
   const handleResetAll = () => setModal("all");
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     if (modal === "page") {
-      // TODO: wire to your reset page logic
-      console.log("Reset page data");
+      setModal(null);
     } else if (modal === "all") {
-      // TODO: wire to your reset all logic
-      console.log("Reset all app data");
+      try {
+        await db.sessions.clear();
+        await db.touches.clear();
+        await db.reflections.clear();
+        localStorage.removeItem("playerCareerStats");
+        localStorage.removeItem("challengeState");
+        localStorage.removeItem("noteToCoach");
+        alert("All application data has been cleared.");
+      } catch (e) {
+        console.error("Error clearing app data:", e);
+      }
+      setModal(null);
     }
-    setModal(null);
+  };
+
+  const handleDeleteAccountConfirm = async () => {
+    try {
+      try {
+        await deleteAccount();
+      } catch (apiErr) {
+        console.warn("Server account deletion warning (may be offline or already removed):", apiErr?.message);
+      }
+
+      await db.sessions.clear();
+      await db.touches.clear();
+      await db.reflections.clear();
+
+      const keysToClear = [
+        "playerProfile",
+        "playerCareerStats",
+        "authToken",
+        "user",
+        "isRegistered",
+        "challengeState",
+        "playerAttendance",
+        "playerEvaluation",
+        "formationSquad",
+        "noteToCoach",
+        "matchDayPrep",
+        "aiAgentChat",
+        "actionSettings",
+        "touch_playerName",
+        "touch_age",
+        "touch_position",
+        "touch_number",
+        "trainingLocation",
+        "gameLocation",
+        "timeInTraining",
+        "minutesPlayed",
+      ];
+      keysToClear.forEach((k) => localStorage.removeItem(k));
+
+      setDeleteAccountModal(false);
+      navigate("/register");
+    } catch (e) {
+      alert("Error deleting local account data: " + e.message);
+    }
+  };
+
+  const handleExportBackup = async () => {
+    try {
+      const allSessions = await db.sessions.toArray();
+      const allTouches = await db.touches.toArray();
+      const allReflections = await db.reflections.toArray();
+
+      const localData = {};
+      const keys = [
+        "playerProfile",
+        "playerCareerStats",
+        "challengeState",
+        "playerAttendance",
+        "playerEvaluation",
+        "formationSquad",
+        "noteToCoach",
+        "matchDayPrep",
+        "aiAgentChat",
+        "actionSettings",
+      ];
+      keys.forEach((k) => {
+        const item = localStorage.getItem(k);
+        if (item) {
+          try {
+            localData[k] = JSON.parse(item);
+          } catch (e) {
+            localData[k] = item;
+          }
+        }
+      });
+
+      const backupObj = {
+        version: "1.0",
+        app: "TOUCHES",
+        exportedAt: new Date().toISOString(),
+        db: {
+          sessions: allSessions,
+          touches: allTouches,
+          reflections: allReflections,
+        },
+        localStorage: localData,
+      };
+
+      const blob = new Blob([JSON.stringify(backupObj, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `touches_player_backup_${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Failed to export data backup: " + (err.message || err));
+    }
+  };
+
+  const handleRestoreBackup = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const json = JSON.parse(event.target.result);
+        if (
+          !json ||
+          typeof json !== "object" ||
+          json.app !== "TOUCHES" ||
+          !json.db ||
+          typeof json.db !== "object"
+        ) {
+          alert("Invalid or incompatible backup file. Please select a valid TOUCHES backup JSON file.");
+          return;
+        }
+
+        const backupDate = json.exportedAt ? new Date(json.exportedAt).toLocaleDateString() : "unknown date";
+        if (
+          !confirm(
+            `Restore player backup from ${backupDate}? Existing records will be safely merged and newer local records will be preserved.`
+          )
+        ) {
+          return;
+        }
+
+        let restoredSessions = 0;
+        let preservedSessions = 0;
+
+        if (Array.isArray(json.db.sessions)) {
+          for (const s of json.db.sessions) {
+            if (!s) continue;
+            const existing = s.id ? await db.sessions.get(s.id) : null;
+            if (!existing) {
+              await db.sessions.put(s);
+              restoredSessions++;
+            } else {
+              const existingTime = new Date(existing.updatedAt || existing.date || 0).getTime();
+              const backupTime = new Date(s.updatedAt || s.date || 0).getTime();
+              if (backupTime > existingTime) {
+                await db.sessions.put(s);
+                restoredSessions++;
+              } else {
+                preservedSessions++;
+              }
+            }
+          }
+        }
+
+        if (Array.isArray(json.db.touches)) {
+          for (const t of json.db.touches) {
+            if (!t) continue;
+            const existing = t.id ? await db.touches.get(t.id) : null;
+            if (!existing) {
+              await db.touches.put(t);
+            }
+          }
+        }
+
+        if (Array.isArray(json.db.reflections)) {
+          for (const r of json.db.reflections) {
+            if (!r) continue;
+            const existing = r.id ? await db.reflections.get(r.id) : null;
+            if (!existing) {
+              await db.reflections.put(r);
+            } else {
+              const existingTime = new Date(existing.updatedAt || existing.date || 0).getTime();
+              const backupTime = new Date(r.updatedAt || r.date || 0).getTime();
+              if (backupTime > existingTime) {
+                await db.reflections.put(r);
+              }
+            }
+          }
+        }
+
+        if (json.localStorage && typeof json.localStorage === "object") {
+          Object.entries(json.localStorage).forEach(([k, v]) => {
+            const existingRaw = localStorage.getItem(k);
+            if (!existingRaw) {
+              localStorage.setItem(
+                k,
+                typeof v === "object" ? JSON.stringify(v) : String(v)
+              );
+            } else {
+              if (k === "challengeState") {
+                try {
+                  const existingState = JSON.parse(existingRaw);
+                  const backupState = typeof v === "object" ? v : JSON.parse(v);
+                  const existingDays = Array.isArray(existingState?.completedDays)
+                    ? existingState.completedDays.length
+                    : 0;
+                  const backupDays = Array.isArray(backupState?.completedDays)
+                    ? backupState.completedDays.length
+                    : 0;
+                  if (backupDays > existingDays) {
+                    localStorage.setItem(k, JSON.stringify(backupState));
+                  }
+                } catch {}
+              } else if (k === "playerCareerStats") {
+                try {
+                  const existingStats = JSON.parse(existingRaw);
+                  const backupStats = typeof v === "object" ? v : JSON.parse(v);
+                  const existingTotal =
+                    existingStats?.totalTouches || existingStats?.total || 0;
+                  const backupTotal =
+                    backupStats?.totalTouches || backupStats?.total || 0;
+                  if (backupTotal > existingTotal) {
+                    localStorage.setItem(k, JSON.stringify(backupStats));
+                  }
+                } catch {}
+              }
+            }
+          });
+        }
+
+        alert(
+          `Backup restore complete! Restored: ${restoredSessions} sessions. Preserved: ${preservedSessions} newer local sessions.`
+        );
+        window.location.reload();
+      } catch (err) {
+        alert("Failed to restore backup: " + (err.message || err));
+      }
+    };
+    reader.readAsText(file);
   };
 
   const faqs = [
@@ -247,6 +491,14 @@ export function Settings() {
         />
         <Divider />
         <SettingRow
+          icon={UserX}
+          title="Delete my account"
+          description="Permanently delete your player profile, session history, and cached credentials."
+          onClick={() => setDeleteAccountModal(true)}
+          danger
+        />
+        <Divider />
+        <SettingRow
           icon={LogOut}
           title="Sign Out"
           description="Exit the current user session."
@@ -258,28 +510,28 @@ export function Settings() {
             DATA MANAGEMENT
         ════════════════════════════════ */}
         <p className={sectionHeaderClass}>Data Management</p>
-        {/* <SettingRow
-          icon={HardDrive}
-          title="Local Data Storage"
-          description="Touches™ stores session data locally on your device. No centralised user database is maintained."
-          onClick={() => {}}
-          rightEl={<span />}
-        /> */}
-        {/* <Divider />
         <SettingRow
-          icon={RotateCcw}
-          title="Undo Last Action"
-          description="Reverses only the most recent touch entry or counter action."
-          onClick={() => {}}
-        /> */}
-        {/* <Divider />
-        <SettingRow
-          icon={Trash2}
-          title="Reset Page Data"
-          description="Clears all visible fields and counters on the current screen."
-          onClick={handleResetPage}
-          danger
-        /> */}
+          icon={Download}
+          title="Export Data Backup"
+          description="Download a complete JSON backup of your sessions, touches, challenge progress, and stats."
+          onClick={handleExportBackup}
+        />
+        <Divider />
+        <div className="relative">
+          <SettingRow
+            icon={Upload}
+            title="Restore from Backup"
+            description="Restore saved player sessions and records from a previously exported backup file."
+            onClick={() => document.getElementById("backup-file-input")?.click()}
+          />
+          <input
+            id="backup-file-input"
+            type="file"
+            accept=".json,application/json"
+            className="hidden"
+            onChange={handleRestoreBackup}
+          />
+        </div>
         <Divider />
         <SettingRow
           icon={Trash}
@@ -297,7 +549,7 @@ export function Settings() {
           icon={Shield}
           title="Privacy Policy"
           description="View how Touches™ handles user-entered information and device data."
-          onClick={() => navigate("/policy")}
+          onClick={() => window.open("https://fatouches.com/privacy", "_blank")}
         />
         {/* <Divider />
         <SettingRow
@@ -394,8 +646,8 @@ export function Settings() {
         <SettingRow
           icon={Mail}
           title="Support / Privacy Requests"
-          description="footballerathleticss@gmail.com"
-          onClick={() => window.open("mailto:footballerathleticss@gmail.com")}
+          description="FootballerAthletics@gmail.com"
+          onClick={() => window.open("mailto:FootballerAthletics@gmail.com")}
         />
 
         {/* ════════════════════════════════
@@ -458,6 +710,14 @@ export function Settings() {
         warning="Deleted items include: Stats · Counters · Reflections · Evaluations · Grades · Reports. This action cannot be reversed."
         onConfirm={confirmAction}
         onCancel={() => setModal(null)}
+      />
+      <ConfirmModal
+        open={deleteAccountModal}
+        title="Delete My Account"
+        message="Are you sure you want to delete your account? This will permanently delete your player profile, session history, and cached credentials on this device."
+        warning="Consequences: All local statistics and training data will be erased immediately. For external server-side records, formal deletion requests can also be submitted to FootballerAthletics@gmail.com."
+        onConfirm={handleDeleteAccountConfirm}
+        onCancel={() => setDeleteAccountModal(false)}
       />
     </div>
   );

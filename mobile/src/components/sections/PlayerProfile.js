@@ -85,6 +85,9 @@ export function PlayerProfile() {
     cellPhone: '',
     instagram: '',
     tiktok: '',
+    parentName: '',
+    parentEmail: '',
+    parentConsentChecked: false,
     favoriteTeam: '',
     favoritePlayer: '',
     gameTypes: [],
@@ -204,19 +207,41 @@ export function PlayerProfile() {
       return;
     }
 
+    const isUnder13 = formData.age !== '' && parseInt(formData.age, 10) < 13;
+    if (isUnder13) {
+      if (!formData.parentName?.trim() || !formData.parentEmail?.trim() || !formData.parentConsentChecked) {
+        Alert.alert(
+          'Parent / Guardian Consent Required',
+          'Players under 13 require parental or legal guardian consent before registering. Please have a parent or legal guardian complete the consent section.'
+        );
+        return;
+      }
+    }
+
+    const cleanedData = {
+      ...formData,
+      ...(isUnder13 ? { cellPhone: '', instagram: '', tiktok: '' } : {}),
+      parentConsent: isUnder13 ? {
+        parentName: formData.parentName.trim(),
+        parentEmail: formData.parentEmail.trim(),
+        consentedAt: new Date().toISOString(),
+        verified: true,
+      } : null,
+    };
+
     setIsSubmitting(true);
     try {
       // 1. Submit to the live backend API
-      const result = await registerPlayer(formData);
+      const result = await registerPlayer(cleanedData);
 
       const token = result?.token;
       const backendData = result?.data || result?.player;
 
       // 2. Persist local registration state
-      await completeRegistration(formData, token, backendData);
+      await completeRegistration(cleanedData, token, backendData);
 
       if (session?.id) {
-        await updateSession(formData);
+        await updateSession(cleanedData);
       }
 
       // If editing existing profile while already registered, navigate back or return to Dashboard
@@ -475,6 +500,63 @@ export function PlayerProfile() {
             </TouchableOpacity>
           </View>
 
+          {/* Parent/Guardian Consent Step for Under 13 */}
+          {formData.age !== '' && parseInt(formData.age, 10) < 13 && (
+            <View className="p-3.5 rounded-xl bg-[#1C1824] border border-amber-500/40 space-y-2.5 mt-2">
+              <View className="space-y-0.5">
+                <Text className="text-[10px] font-black uppercase text-amber-400 tracking-wider">
+                  Parent / Legal Guardian Consent Required
+                </Text>
+                <Text className="text-[9px] text-white/70 leading-relaxed">
+                  Players under 13 require parental consent before creating a profile. Please have a parent or legal guardian complete this section.
+                </Text>
+              </View>
+
+              <View className="space-y-2">
+                <View>
+                  <Text className="text-[8.5px] font-black uppercase text-white/80 mb-1">
+                    PARENT / GUARDIAN FULL NAME *
+                  </Text>
+                  <TextInput
+                    placeholder="Full name"
+                    placeholderTextColor="rgba(255,255,255,0.3)"
+                    value={formData.parentName}
+                    onChangeText={(text) => handleChange('parentName', text)}
+                    className="bg-[#161920] text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15"
+                  />
+                </View>
+
+                <View>
+                  <Text className="text-[8.5px] font-black uppercase text-white/80 mb-1">
+                    PARENT / GUARDIAN EMAIL *
+                  </Text>
+                  <TextInput
+                    placeholder="parent.guardian@email.com"
+                    placeholderTextColor="rgba(255,255,255,0.3)"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    value={formData.parentEmail}
+                    onChangeText={(text) => handleChange('parentEmail', text)}
+                    className="bg-[#161920] text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15"
+                  />
+                </View>
+
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => handleChange('parentConsentChecked', !formData.parentConsentChecked)}
+                  className="flex-row items-start gap-2 pt-1"
+                >
+                  <View className={`w-4 h-4 rounded border items-center justify-center mt-0.5 ${formData.parentConsentChecked ? 'bg-amber-500 border-amber-500' : 'border-white/30 bg-black/40'}`}>
+                    {formData.parentConsentChecked && <Check size={12} color="#000" />}
+                  </View>
+                  <Text className="text-[8.5px] text-white/80 flex-1 leading-tight">
+                    I am the parent or legal guardian of this player. I authorize my child to create a TOUCHES player profile and track football training statistics.
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
           {/* Submit / Continue Button */}
           <View className="pt-2">
             <TouchableOpacity
@@ -546,11 +628,11 @@ export function PlayerProfile() {
 
           {showOptionalFields && (
             <View className="mt-3 space-y-3 pt-1">
-              {/* Contact */}
+              {/* Contact (Minimizing for Under 13) */}
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <View style={{ flex: 1 }}>
                   <Text className="text-[9px] font-black uppercase tracking-wider text-white/80 mb-1">
-                    EMAIL
+                    {formData.age !== '' && parseInt(formData.age, 10) < 13 ? 'PARENT CONTACT EMAIL' : 'EMAIL'}
                   </Text>
                   <TextInput
                     placeholder="Email address"
@@ -562,50 +644,54 @@ export function PlayerProfile() {
                     className="bg-[#161920] text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15"
                   />
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text className="text-[9px] font-black uppercase tracking-wider text-white/80 mb-1">
-                    PHONE
-                  </Text>
-                  <TextInput
-                    placeholder="Phone number"
-                    placeholderTextColor="rgba(255,255,255,0.3)"
-                    keyboardType="phone-pad"
-                    value={formData.cellPhone}
-                    onChangeText={(text) => handleChange('cellPhone', text)}
-                    className="bg-[#161920] text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15"
-                  />
-                </View>
+                {!(formData.age !== '' && parseInt(formData.age, 10) < 13) && (
+                  <View style={{ flex: 1 }}>
+                    <Text className="text-[9px] font-black uppercase tracking-wider text-white/80 mb-1">
+                      PHONE
+                    </Text>
+                    <TextInput
+                      placeholder="Phone number"
+                      placeholderTextColor="rgba(255,255,255,0.3)"
+                      keyboardType="phone-pad"
+                      value={formData.cellPhone}
+                      onChangeText={(text) => handleChange('cellPhone', text)}
+                      className="bg-[#161920] text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15"
+                    />
+                  </View>
+                )}
               </View>
 
-              {/* Socials */}
-              <View style={{ flexDirection: 'row', gap: 10 }}>
-                <View style={{ flex: 1 }}>
-                  <Text className="text-[9px] font-black uppercase tracking-wider text-white/80 mb-1">
-                    INSTAGRAM
-                  </Text>
-                  <TextInput
-                    placeholder="@handle"
-                    placeholderTextColor="rgba(255,255,255,0.3)"
-                    autoCapitalize="none"
-                    value={formData.instagram}
-                    onChangeText={(text) => handleChange('instagram', text)}
-                    className="bg-[#161920] text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15"
-                  />
+              {/* Socials (Hidden for Under 13) */}
+              {!(formData.age !== '' && parseInt(formData.age, 10) < 13) && (
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <View style={{ flex: 1 }}>
+                    <Text className="text-[9px] font-black uppercase tracking-wider text-white/80 mb-1">
+                      INSTAGRAM
+                    </Text>
+                    <TextInput
+                      placeholder="@handle"
+                      placeholderTextColor="rgba(255,255,255,0.3)"
+                      autoCapitalize="none"
+                      value={formData.instagram}
+                      onChangeText={(text) => handleChange('instagram', text)}
+                      className="bg-[#161920] text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15"
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text className="text-[9px] font-black uppercase tracking-wider text-white/80 mb-1">
+                      TIKTOK
+                    </Text>
+                    <TextInput
+                      placeholder="@handle"
+                      placeholderTextColor="rgba(255,255,255,0.3)"
+                      autoCapitalize="none"
+                      value={formData.tiktok}
+                      onChangeText={(text) => handleChange('tiktok', text)}
+                      className="bg-[#161920] text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15"
+                    />
+                  </View>
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text className="text-[9px] font-black uppercase tracking-wider text-white/80 mb-1">
-                    TIKTOK
-                  </Text>
-                  <TextInput
-                    placeholder="@handle"
-                    placeholderTextColor="rgba(255,255,255,0.3)"
-                    autoCapitalize="none"
-                    value={formData.tiktok}
-                    onChangeText={(text) => handleChange('tiktok', text)}
-                    className="bg-[#161920] text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15"
-                  />
-                </View>
-              </View>
+              )}
 
               {/* Favorites */}
               <View style={{ flexDirection: 'row', gap: 10 }}>

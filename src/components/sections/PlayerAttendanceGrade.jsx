@@ -135,12 +135,10 @@ export function PlayerAttendanceGrade({ isPdf, pdfPart }) {
       {/* ── Team & Date Header Inputs ── */}
       <div className="grid grid-cols-2 gap-2.5 p-3.5 rounded-2xl border border-white/10 bg-[#12151D]">
         <div>
-          <label className="block text-[9px] font-black uppercase tracking-wider text-white/60 mb-1">
-            TEAM
-          </label>
           <input
             type="text"
             placeholder="Team Name"
+            aria-label="Team Name"
             value={fullData.metadata.team}
             onChange={(e) => handleMetadataChange("team", e.target.value)}
             className={`w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422] ${isPdf ? "text-center" : ""}`}
@@ -149,12 +147,10 @@ export function PlayerAttendanceGrade({ isPdf, pdfPart }) {
         </div>
 
         <div>
-          <label className="block text-[9px] font-black uppercase tracking-wider text-white/60 mb-1">
-            DATE
-          </label>
           <input
             type="text"
             placeholder="Date"
+            aria-label="Date"
             value={fullData.metadata.date}
             onChange={(e) => handleMetadataChange("date", e.target.value)}
             className={`w-full bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15 focus:outline-none focus:border-[#FF4422] ${isPdf ? "text-center" : ""}`}

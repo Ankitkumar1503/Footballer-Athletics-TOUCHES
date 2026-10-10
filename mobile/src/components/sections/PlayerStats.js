@@ -119,11 +119,11 @@ export function PlayerStats() {
   const handleReset = () => {
     Alert.alert(
       'Reset Player Stats',
-      'Are you sure you want to reset all Player Stats? This will clear your custom career and development stats.',
+      'Are you sure? This will clear your custom career and development stats. Your session data and profile remain safe.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'Reset',
+          text: 'Confirm',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -348,26 +348,11 @@ export function PlayerStats() {
           </TouchableOpacity>
         </View>
 
-        {/* Community Footers Breakdown */}
-        <View className="space-y-1.5 pt-1 border-t border-white/10 relative z-10">
-          <View className="flex-row justify-between">
-            <View>
-              <Text className="text-lg font-black text-[#FF4422]">12,847</Text>
-              <Text className="text-[7.5px] font-black uppercase tracking-wider text-[#FF4422]">
-                LEFT FOOTERS
-              </Text>
-            </View>
-            <View className="items-end">
-              <Text className="text-lg font-black text-[#00AEEF]">19,204</Text>
-              <Text className="text-[7.5px] font-black uppercase tracking-wider text-[#00AEEF]">
-                RIGHT FOOTERS
-              </Text>
-            </View>
-          </View>
-          <View className="w-full h-2 bg-black/50 rounded-full overflow-hidden flex-row">
-            <View className="h-full bg-[#FF4422] w-[40%]" />
-            <View className="h-full bg-[#00AEEF] w-[60%]" />
-          </View>
+        {/* Community Footers Breakdown - Client verified text */}
+        <View className="pt-2 border-t border-white/10 relative z-10 py-2 px-3 rounded-xl bg-black/30 border border-white/5 items-center">
+          <Text className="text-[9.5px] font-bold uppercase tracking-wide text-white/70 text-center">
+            Registry totals appear once 50 players have joined.
+          </Text>
         </View>
       </View>
 
@@ -460,7 +445,7 @@ export function PlayerStats() {
             },
             {
               id: 'shotsOnTarget',
-              label: 'SHOTS ON TARGET',
+              label: 'SHOTS',
               displayValue: resolveValue(formData.shotsOnTarget, cumulativeStats.shotsOnTarget),
               rawValue: formData.shotsOnTarget,
             },

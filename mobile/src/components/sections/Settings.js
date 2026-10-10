@@ -9,14 +9,18 @@ import {
   FileText,
   ChevronRight,
   ChevronDown,
-  ChevronUp,
   Mail,
   Lock,
+  Shield,
+  Download,
+  Upload,
+  UserX,
 } from 'lucide-react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useActiveSession } from '../../hooks/useActiveSession';
 import { db } from '../../lib/db';
 import { generateAndSharePdf } from '../../lib/pdfGenerator';
+import { deleteAccount } from '../../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function Settings() {
@@ -64,6 +68,246 @@ export function Settings() {
         },
       },
     ]);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete My Account',
+      'Are you sure you want to delete your account? This will permanently delete your registered profile on the server and erase all local session history, touches, and credentials from this device.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete Account',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // 1. Attempt server-side deletion
+              try {
+                await deleteAccount();
+              } catch (apiErr) {
+                console.warn('Server-side account deletion notice:', apiErr?.message);
+              }
+
+              // 2. Clear local database tables
+              await db.sessions.clear();
+              await db.touches.clear();
+              await db.reflections.clear();
+              const keys = [
+                'playerProfile',
+                'playerCareerStats',
+                'challengeState',
+                'playerAttendance',
+                'playerEvaluation',
+                'footballFormation',
+                'formationSquad',
+                'noteToCoach',
+                'matchDayPrep',
+                'aiAgentChat',
+                'actionSettings',
+                'authToken',
+                'user',
+                'isRegistered',
+              ];
+              await AsyncStorage.multiRemove(keys);
+              await logout();
+              Alert.alert(
+                'Account Deleted',
+                'Your account and all local player records have been permanently erased.'
+              );
+            } catch (e) {
+              console.error('Error deleting account:', e);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleExportBackup = async () => {
+    try {
+      const allSessions = await db.sessions.getAll();
+      const allTouches = await db.touches.getAll();
+      const allReflections = await db.reflections.getAll();
+
+      const keys = [
+        'playerProfile',
+        'playerCareerStats',
+        'challengeState',
+        'playerAttendance',
+        'playerEvaluation',
+        'footballFormation',
+        'formationSquad',
+        'noteToCoach',
+        'matchDayPrep',
+        'aiAgentChat',
+        'actionSettings',
+      ];
+      const stores = await AsyncStorage.multiGet(keys);
+      const localData = {};
+      stores.forEach(([k, v]) => {
+        if (v) {
+          try { localData[k] = JSON.parse(v); } catch { localData[k] = v; }
+        }
+      });
+
+      const backupObj = {
+        version: '1.0',
+        app: 'TOUCHES',
+        exportedAt: new Date().toISOString(),
+        db: {
+          sessions: allSessions,
+          touches: allTouches,
+          reflections: allReflections,
+        },
+        localStorage: localData,
+      };
+
+      const backupJson = JSON.stringify(backupObj);
+      await AsyncStorage.setItem('playerDataBackup', backupJson);
+      Alert.alert(
+        'Data Backup Saved',
+        `Successfully backed up ${allSessions.length} sessions, ${allTouches.length} touches, and your player development stats locally.`
+      );
+    } catch (err) {
+      Alert.alert('Backup Error', err?.message || 'Could not export backup.');
+    }
+  };
+
+  const handleRestoreBackup = async () => {
+    try {
+      const savedBackup = await AsyncStorage.getItem('playerDataBackup');
+      if (!savedBackup) {
+        Alert.alert(
+          'No Backup Found',
+          'No saved player backup was found on this device. Create a backup first by tapping Export Data Backup.'
+        );
+        return;
+      }
+
+      Alert.alert(
+        'Restore Data Backup',
+        'Restore player data from your saved backup? Existing records will be safely merged and newer local records will be preserved.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Restore',
+            onPress: async () => {
+              try {
+                const parsed = JSON.parse(savedBackup);
+                if (
+                  !parsed ||
+                  typeof parsed !== 'object' ||
+                  parsed.app !== 'TOUCHES' ||
+                  !parsed.db ||
+                  typeof parsed.db !== 'object'
+                ) {
+                  Alert.alert('Invalid Backup', 'The saved backup is invalid or incompatible with TOUCHES.');
+                  return;
+                }
+
+                let restoredCount = 0;
+                let preservedCount = 0;
+
+                if (Array.isArray(parsed?.db?.sessions)) {
+                  for (const s of parsed.db.sessions) {
+                    if (!s) continue;
+                    const existing = s.id ? await db.sessions.get(s.id) : null;
+                    if (!existing) {
+                      await db.sessions.put(s);
+                      restoredCount++;
+                    } else {
+                      const existingTime = new Date(existing.updatedAt || existing.date || 0).getTime();
+                      const backupTime = new Date(s.updatedAt || s.date || 0).getTime();
+                      if (backupTime > existingTime) {
+                        await db.sessions.put(s);
+                        restoredCount++;
+                      } else {
+                        preservedCount++;
+                      }
+                    }
+                  }
+                }
+
+                if (Array.isArray(parsed?.db?.touches)) {
+                  for (const t of parsed.db.touches) {
+                    if (!t) continue;
+                    const existing = t.id ? await db.touches.get(t.id) : null;
+                    if (!existing) {
+                      await db.touches.put(t);
+                    }
+                  }
+                }
+
+                if (Array.isArray(parsed?.db?.reflections)) {
+                  for (const r of parsed.db.reflections) {
+                    if (!r) continue;
+                    const existing = r.id ? await db.reflections.get(r.id) : null;
+                    if (!existing) {
+                      await db.reflections.put(r);
+                    } else {
+                      const existingTime = new Date(existing.updatedAt || existing.date || 0).getTime();
+                      const backupTime = new Date(r.updatedAt || r.date || 0).getTime();
+                      if (backupTime > existingTime) {
+                        await db.reflections.put(r);
+                      }
+                    }
+                  }
+                }
+
+                if (parsed.localStorage && typeof parsed.localStorage === 'object') {
+                  for (const [k, v] of Object.entries(parsed.localStorage)) {
+                    const existingRaw = await AsyncStorage.getItem(k);
+                    if (!existingRaw) {
+                      await AsyncStorage.setItem(
+                        k,
+                        typeof v === 'object' ? JSON.stringify(v) : String(v)
+                      );
+                    } else {
+                      if (k === 'challengeState') {
+                        try {
+                          const existingState = JSON.parse(existingRaw);
+                          const backupState = typeof v === 'object' ? v : JSON.parse(v);
+                          const existingDays = Array.isArray(existingState?.completedDays)
+                            ? existingState.completedDays.length
+                            : 0;
+                          const backupDays = Array.isArray(backupState?.completedDays)
+                            ? backupState.completedDays.length
+                            : 0;
+                          if (backupDays > existingDays) {
+                            await AsyncStorage.setItem(k, JSON.stringify(backupState));
+                          }
+                        } catch {}
+                      } else if (k === 'playerCareerStats') {
+                        try {
+                          const existingStats = JSON.parse(existingRaw);
+                          const backupStats = typeof v === 'object' ? v : JSON.parse(v);
+                          const existingTotal =
+                            existingStats?.totalTouches || existingStats?.total || 0;
+                          const backupTotal =
+                            backupStats?.totalTouches || backupStats?.total || 0;
+                          if (backupTotal > existingTotal) {
+                            await AsyncStorage.setItem(k, JSON.stringify(backupStats));
+                          }
+                        } catch {}
+                      }
+                    }
+                  }
+                }
+
+                Alert.alert(
+                  'Restore Complete',
+                  `Your player data was restored successfully. Restored: ${restoredCount} sessions. Preserved: ${preservedCount} newer local sessions.`
+                );
+              } catch (e) {
+                Alert.alert('Restore Failed', e?.message || 'Could not parse backup.');
+              }
+            },
+          },
+        ]
+      );
+    } catch (e) {
+      Alert.alert('Error', e?.message || 'Restore error.');
+    }
   };
 
   const handleResetSession = () => {
@@ -152,6 +396,24 @@ export function Settings() {
         </TouchableOpacity>
 
         <TouchableOpacity
+          onPress={handleDeleteAccount}
+          className="p-3 rounded-xl bg-[#1F1012] border border-rose-500/30 flex-row items-center justify-between"
+        >
+          <View className="flex-row items-center gap-3">
+            <UserX size={16} color="#FB7185" />
+            <View>
+              <Text className="text-xs font-black uppercase text-rose-400">
+                Delete My Account
+              </Text>
+              <Text className="text-[9px] text-rose-300/70">
+                Permanently erase profile & player data
+              </Text>
+            </View>
+          </View>
+          <ChevronRight size={14} color="#FB7185" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
           onPress={handleSignOut}
           className="p-3 rounded-xl bg-[#1F1012] border border-rose-500/30 flex-row items-center justify-between"
         >
@@ -193,6 +455,38 @@ export function Settings() {
         </TouchableOpacity>
 
         <TouchableOpacity
+          onPress={handleExportBackup}
+          className="p-3 rounded-xl bg-[#12151D] border border-white/10 flex-row items-center justify-between"
+        >
+          <View className="flex-row items-center gap-3">
+            <Download size={16} color="#10B981" />
+            <View>
+              <Text className="text-xs font-black uppercase text-white">Export Data Backup</Text>
+              <Text className="text-[9px] text-white/60">
+                Save complete backup of sessions & stats
+              </Text>
+            </View>
+          </View>
+          <ChevronRight size={14} color="rgba(255,255,255,0.4)" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleRestoreBackup}
+          className="p-3 rounded-xl bg-[#12151D] border border-white/10 flex-row items-center justify-between"
+        >
+          <View className="flex-row items-center gap-3">
+            <Upload size={16} color="#00AEEF" />
+            <View>
+              <Text className="text-xs font-black uppercase text-white">Restore Data Backup</Text>
+              <Text className="text-[9px] text-white/60">
+                Restore player records from saved backup
+              </Text>
+            </View>
+          </View>
+          <ChevronRight size={14} color="rgba(255,255,255,0.4)" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
           onPress={handleResetSession}
           className="p-3 rounded-xl bg-[#12151D] border border-white/10 flex-row items-center justify-between"
         >
@@ -227,6 +521,31 @@ export function Settings() {
         </TouchableOpacity>
       </View>
 
+      {/* ── PRIVACY & LEGAL ── */}
+      <View className="space-y-1 pt-2">
+        <Text className="text-[9px] font-black uppercase tracking-widest text-white/50 mb-1">
+          Privacy & Legal
+        </Text>
+
+        <TouchableOpacity
+          onPress={() => Linking.openURL('https://fatouches.com/privacy')}
+          className="p-3 rounded-xl bg-[#12151D] border border-white/10 flex-row items-center justify-between"
+        >
+          <View className="flex-row items-center gap-3">
+            <Shield size={16} color="#34D399" />
+            <View>
+              <Text className="text-xs font-black uppercase text-white">
+                Privacy Policy
+              </Text>
+              <Text className="text-[9px] text-white/60">
+                https://fatouches.com/privacy
+              </Text>
+            </View>
+          </View>
+          <ChevronRight size={14} color="rgba(255,255,255,0.4)" />
+        </TouchableOpacity>
+      </View>
+
       {/* ── CONTACT & SUPPORT ── */}
       <View className="space-y-1 pt-2">
         <Text className="text-[9px] font-black uppercase tracking-widest text-white/50 mb-1">
@@ -234,7 +553,7 @@ export function Settings() {
         </Text>
 
         <TouchableOpacity
-          onPress={() => Linking.openURL('mailto:footballerathleticss@gmail.com')}
+          onPress={() => Linking.openURL('mailto:FootballerAthletics@gmail.com')}
           className="p-3 rounded-xl bg-[#12151D] border border-white/10 flex-row items-center justify-between"
         >
           <View className="flex-row items-center gap-3">
@@ -244,7 +563,7 @@ export function Settings() {
                 Support / Privacy Requests
               </Text>
               <Text className="text-[9px] text-white/60">
-                footballerathleticss@gmail.com
+                FootballerAthletics@gmail.com
               </Text>
             </View>
           </View>
@@ -262,7 +581,7 @@ export function Settings() {
           onPress={() => {
             Alert.alert(
               'Data Control & Deletion',
-              'Submit a request to footballerathleticss@gmail.com to have your data reviewed or permanently deleted.'
+              'Submit a request to FootballerAthletics@gmail.com to have your account or data reviewed or permanently deleted from all systems.'
             );
           }}
           className="p-3 rounded-xl bg-[#12151D] border border-white/10 flex-row items-center justify-between"

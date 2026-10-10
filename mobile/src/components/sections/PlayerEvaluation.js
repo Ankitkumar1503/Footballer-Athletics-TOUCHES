@@ -30,7 +30,6 @@ const EVALUATION_CATEGORIES = {
   ],
   'CO-ORDINATION': [
     'Orientation',
-    'Endurance',
     'Rhythm',
     'Differentiation',
     'Reaction',
@@ -152,9 +151,6 @@ export function PlayerEvaluation() {
       <View className="p-3.5 rounded-2xl border border-white/10 bg-[#12151D] space-y-2.5">
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <View style={{ flex: 1 }}>
-            <Text className="text-[8.5px] font-black uppercase text-white/60 mb-1">
-              PLAYER NAME
-            </Text>
             <TextInput
               value={playerName}
               onChangeText={handleNameChange}
@@ -164,9 +160,6 @@ export function PlayerEvaluation() {
             />
           </View>
           <View style={{ width: 85 }}>
-            <Text className="text-[8.5px] font-black uppercase text-white/60 mb-1">
-              AGE
-            </Text>
             <TextInput
               value={playerAge}
               onChangeText={handleAgeChange}
@@ -179,9 +172,6 @@ export function PlayerEvaluation() {
         </View>
 
         <View>
-          <Text className="text-[8.5px] font-black uppercase text-white/60 mb-1">
-            EVALUATION BY
-          </Text>
           <TextInput
             value={evaluatedBy}
             onChangeText={handleEvaluatorChange}

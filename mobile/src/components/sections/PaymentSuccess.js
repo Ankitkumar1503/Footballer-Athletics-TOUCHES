@@ -37,7 +37,7 @@ export function PaymentSuccess() {
           </View>
           <View className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40">
             <Text className="text-[9px] font-black uppercase text-emerald-400">
-              VERIFIED
+              ACTIVE
             </Text>
           </View>
         </View>

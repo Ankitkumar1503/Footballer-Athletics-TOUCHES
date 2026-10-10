@@ -64,14 +64,13 @@ export function useCumulativeStats() {
       const oneMonthAgo = now - 30 * 24 * 60 * 60 * 1000;
 
       const INDEPENDENT_EVENTS = [
+        'Goal',
         'Yellow Card',
         'Red Card',
         'Missed Game',
         'Sub In',
         'Sub Out',
         'Injury',
-        'Penalty',
-        'Penalty Kick',
         'Keep-Up-Feet',
         'Keep-Up-Head'
       ];
@@ -148,6 +147,7 @@ export function useCumulativeStats() {
         monthTouches,
         totalCornerKicks,
         totalThrowIns,
+        shots: shotsOnTarget,
         shotsOnTarget,
         tacklesMade,
         headers,

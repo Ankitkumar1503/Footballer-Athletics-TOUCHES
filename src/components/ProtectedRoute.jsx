@@ -18,10 +18,35 @@ export function ProtectedRoute({ children }) {
     );
   }
 
-  // Check if authenticated via backend token OR local session profile exists
-  const hasLocalProfile = Boolean(localStorage.getItem("playerProfile"));
+  // Check if authenticated via backend token OR valid local profile exists
+  let isProfileValid = false;
+  const storedProfile = localStorage.getItem("playerProfile");
+  const isRegistered = localStorage.getItem("isRegistered") === "true";
 
-  if (!isAuthenticated && !hasLocalProfile) {
+  if (storedProfile && isRegistered) {
+    try {
+      const parsed = JSON.parse(storedProfile);
+      const isUnder13 = parsed.age !== "" && parseInt(parsed.age, 10) < 13;
+      if (isUnder13) {
+        // Under 13 requires parent consent to access protected routes
+        if (
+          parsed.parentConsent?.parentName &&
+          parsed.parentConsent?.parentEmail &&
+          parsed.parentConsent?.verified
+        ) {
+          isProfileValid = true;
+        } else {
+          isProfileValid = false;
+        }
+      } else {
+        isProfileValid = true;
+      }
+    } catch {
+      isProfileValid = false;
+    }
+  }
+
+  if (!isAuthenticated && !isProfileValid) {
     return <Navigate to="/register" state={{ from: location }} replace />;
   }
 

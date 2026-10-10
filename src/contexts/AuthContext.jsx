@@ -36,7 +36,6 @@ export function AuthProvider({ children }) {
       const loginToken = urlParams.get("login_token");
 
       if (loginToken) {
-        console.log(`[AUTH CONTEXT] 🚀 login_token detected: "${loginToken}". Firing backend verification request...`);
         try {
           // Call API endpoint GET /api/auth/verify-login-token?token=<token>
           const response = await verifyLoginToken(loginToken);
@@ -48,8 +47,6 @@ export function AuthProvider({ children }) {
             footer: response?.footer || response?.activeFooter || "RIGHT",
             paymentStatus: response?.paymentStatus || "paid",
           };
-
-          console.log("[AUTH CONTEXT] ✅ Token verification successful! Received user & JWT:", { jwt, userData });
 
           // Persist session tokens & user profile
           localStorage.setItem("authToken", jwt);
@@ -79,10 +76,9 @@ export function AuthProvider({ children }) {
           url.searchParams.delete("login_token");
           window.history.replaceState({}, document.title, url.pathname + url.search);
 
-          console.log("[AUTH CONTEXT] 🔀 Token verified! Redirecting straight to /dashboard...");
           window.location.href = "/dashboard";
         } catch (error) {
-          console.error("[AUTH CONTEXT] ❌ Token verification failed or backend unreachable:", error);
+          console.error("[AUTH] Token verification failed:", error?.message || "Verification error");
           setAuthError("Invalid or expired login token.");
 
           // Remove parameter from URL
@@ -123,6 +119,38 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(true);
   };
 
+  const completeRegistration = (profileData, jwtToken, backendData) => {
+    try {
+      localStorage.setItem("isRegistered", "true");
+      localStorage.setItem("playerProfile", JSON.stringify(profileData));
+
+      if (jwtToken) {
+        localStorage.setItem("authToken", jwtToken);
+        setToken(jwtToken);
+      }
+
+      const userData = {
+        id: backendData?.id || undefined,
+        name:
+          profileData.fullName ||
+          profileData.playerName ||
+          backendData?.name ||
+          "Player",
+        email: profileData.email || backendData?.email || "",
+        footer: (profileData.activeFooter || "RIGHT").toUpperCase(),
+        paymentStatus: backendData?.paymentStatus || "unpaid",
+      };
+
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+      setIsAuthenticated(true);
+      return true;
+    } catch (e) {
+      console.error("Error persisting registration state:", e);
+      throw e;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
@@ -159,6 +187,7 @@ export function AuthProvider({ children }) {
         isVerifyingToken,
         authError,
         login,
+        completeRegistration,
         logout,
       }}
     >

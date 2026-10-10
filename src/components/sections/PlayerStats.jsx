@@ -247,35 +247,44 @@ export function PlayerStats({ isPdf = false }) {
     }
   };
 
+  const [showResetModal, setShowResetModal] = useState(false);
+
   const handleReset = () => {
-    if (confirm("Reset Player Stats? This will clear your custom career and development stats.")) {
-      localStorage.removeItem("playerCareerStats");
-      setFormData((prev) => ({
-        ...prev,
-        totalTouches: "",
-        totalYearsPlaying: "",
-        totalHoursTrained: "",
-        totalSessions: "",
-        totalGames: "",
-        totalGoals: "",
-        totalPenalties: "",
-        totalCornerKicks: "",
-        totalThrowIns: "",
-        shotsOnTarget: "",
-        tacklesMade: "",
-        headers: "",
-        yellowCards: "",
-        redCards: "",
-        subIn: "",
-        subOut: "",
-        injured: "",
-        missedGames: "",
-        freeKicks: "",
-        recoveryDays: "",
-        keepUpFeet: "",
-        keepUpHead: "",
-      }));
-    }
+    setShowResetModal(true);
+  };
+
+  const confirmResetAction = () => {
+    localStorage.removeItem("playerCareerStats");
+    setFormData((prev) => ({
+      ...prev,
+      totalTouches: "",
+      totalYearsPlaying: "",
+      totalHoursTrained: "",
+      totalSessions: "",
+      totalGames: "",
+      totalGoals: "",
+      totalPenalties: "",
+      totalCornerKicks: "",
+      totalThrowIns: "",
+      shotsOnTarget: "",
+      tacklesMade: "",
+      headers: "",
+      yellowCards: "",
+      redCards: "",
+      subIn: "",
+      subOut: "",
+      injured: "",
+      missedGames: "",
+      freeKicks: "",
+      recoveryDays: "",
+      keepUpFeet: "",
+      keepUpHead: "",
+    }));
+    setShowResetModal(false);
+  };
+
+  const cancelResetAction = () => {
+    setShowResetModal(false);
   };
 
   const StatCard = ({ id, label, displayValue, rawValue, isYellow = false, colorClass = "text-white" }) => (
@@ -436,28 +445,10 @@ export function PlayerStats({ isPdf = false }) {
         </div>
 
         {/* Community Footers Live Stats Breakdown */}
-        <div className="space-y-2 pt-2 border-t border-white/10 relative z-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-xl font-black text-[#FF4422]">12,847</div>
-              <div className="text-[8px] font-black uppercase tracking-wider text-[#FF4422]">
-                LEFT FOOTERS
-              </div>
-            </div>
-
-            <div className="text-right">
-              <div className="text-xl font-black text-[#00AEEF]">19,204</div>
-              <div className="text-[8px] font-black uppercase tracking-wider text-[#00AEEF]">
-                RIGHT FOOTERS
-              </div>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="w-full h-2 bg-black/50 rounded-full overflow-hidden flex">
-            <div className="h-full bg-[#FF4422] w-[40%]" />
-            <div className="h-full bg-[#00AEEF] w-[60%]" />
-          </div>
+        <div className="pt-2 border-t border-white/10 relative z-10 text-center py-2 px-3 rounded-xl bg-black/30 border border-white/5">
+          <p className="text-[10px] font-bold tracking-wide text-white/70 uppercase">
+            Registry totals appear once 50 players have joined.
+          </p>
         </div>
       </div>
 
@@ -536,7 +527,7 @@ export function PlayerStats({ isPdf = false }) {
           />
           <StatCard
             id="shotsOnTarget"
-            label="SHOTS ON TARGET"
+            label="SHOTS"
             displayValue={resolveValue(formData.shotsOnTarget, cumulativeStats.shotsOnTarget)}
             rawValue={formData.shotsOnTarget}
           />
@@ -682,6 +673,39 @@ export function PlayerStats({ isPdf = false }) {
           onReset={handleReset}
           sectionKey="stats"
         />
+      )}
+
+      {/* ── Reset Confirmation Modal ── */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#12151D] border border-white/20 rounded-2xl p-5 max-w-sm w-full space-y-4 shadow-2xl">
+            <div className="space-y-1 text-center">
+              <h3 className="text-lg font-black uppercase text-white tracking-wider">
+                Reset Player Stats
+              </h3>
+              <p className="text-xs text-white/70 leading-relaxed">
+                Are you sure? This will clear your custom career and development stats. Your session data and profile remain safe.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={cancelResetAction}
+                className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-black text-xs uppercase tracking-wider border border-white/15 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmResetAction}
+                className="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-rose-600/30 transition-all"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

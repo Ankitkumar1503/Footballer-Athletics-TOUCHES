@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "Touches",
+    "name": "Footballer Athletics TOUCHES",
     "slug": "touches-mobile",
     "version": "1.0.0",
+    "description": "Are you a Footballer / Are you a Left or Right Footer? One-time purchase. Yours for life.",
     "orientation": "portrait",
     "icon": "./assets/touches_icon.png",
     "userInterfaceStyle": "dark",
@@ -14,7 +15,8 @@
       "backgroundColor": "#07090E"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.touches.footballapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -32,6 +34,15 @@
     "extra": {
       "eas": {
         "projectId": "80cfce83-8212-4ed4-9aab-5ae503ba7cc8"
+      },
+      "storeMetadata": {
+        "name": "Footballer Athletics TOUCHES",
+        "subtitle": "Are you a Footballer / Are you a Left or Right Footer?",
+        "marketingUrl": "https://fatouches.com",
+        "supportUrl": "https://fatouches.com",
+        "privacyPolicyUrl": "https://fatouches.com/privacy",
+        "supportEmail": "FootballerAthletics@gmail.com",
+        "storeDescriptionPhrase": "One-time purchase. Yours for life."
       }
     }
   }

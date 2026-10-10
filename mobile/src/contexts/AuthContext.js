@@ -26,9 +26,19 @@ export function AuthProvider({ children }) {
           setIsAuthenticated(true);
         }
 
-        // Check if player has completed registration on this device
-        if (registeredFlag === 'true') {
-          setIsRegistered(true);
+        // Check if player has completed registration with valid consent
+        if (registeredFlag === 'true' && storedProfile) {
+          try {
+            const parsed = JSON.parse(storedProfile);
+            const isUnder13 = parsed.age !== '' && parseInt(parsed.age, 10) < 13;
+            if (isUnder13 && (!parsed.parentConsent?.parentName || !parsed.parentConsent?.parentEmail)) {
+              setIsRegistered(false);
+            } else {
+              setIsRegistered(true);
+            }
+          } catch {
+            setIsRegistered(false);
+          }
         } else {
           setIsRegistered(false);
         }

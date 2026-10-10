@@ -94,6 +94,9 @@ export function parseVoiceCommand(text) {
   if (lower.includes('injury') || lower.includes('injured')) {
     return { type: 'event', id: 'Injury' };
   }
+  if (lower.includes('goal')) {
+    return { type: 'event', id: 'Goal' };
+  }
 
   // Quality specification
   let quality = null;
@@ -118,7 +121,6 @@ export function parseVoiceCommand(text) {
   if (lower.includes('pass')) actionId = 'Pass';
   else if (lower.includes('dribble')) actionId = 'Dribble';
   else if (lower.includes('shot') || lower.includes('shoot')) actionId = 'Shot';
-  else if (lower.includes('goal')) actionId = 'Goal';
   else if (lower.includes('header') || lower.includes('head')) actionId = 'Header';
   else if (lower.includes('tackle')) actionId = 'Tackle';
   else if (lower.includes('free kick') || lower.includes('freekick')) actionId = 'Free Kick';
@@ -149,7 +151,7 @@ export function parseVoiceCommand(text) {
 
 export function ActionWheel() {
   const { stats, sessionId, addTouch, removeTouch, updateSession } = useActiveSession();
-  const [selectedQuality, setSelectedQuality] = useState('Positive');
+  const [selectedQuality, setSelectedQuality] = useState(null);
   const [lastLoggedAction, setLastLoggedAction] = useState(null);
 
   // Player & Session Details
@@ -259,7 +261,7 @@ export function ActionWheel() {
 
   const handleActionTap = async (actionId, overrideQuality = null) => {
     const isIndependent = [
-      'Penalty',
+      'Goal',
       'Keep-Up-Feet',
       'Keep-Up-Head',
       'Yellow Card',
@@ -270,7 +272,7 @@ export function ActionWheel() {
       'Injury',
     ].includes(actionId);
 
-    const quality = isIndependent ? 'Event' : overrideQuality || selectedQuality;
+    const quality = isIndependent ? 'Event' : (overrideQuality !== null ? overrideQuality : selectedQuality);
     await addTouch(actionId, quality);
     setLastLoggedAction({ action: actionId, quality });
     setTimeout(() => setLastLoggedAction(null), 1200);
@@ -485,9 +487,6 @@ export function ActionWheel() {
         {/* Row 1: PLAYER NAME & AGE */}
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <View style={{ flex: 1 }}>
-            <Text className="text-[9.5px] font-black uppercase tracking-wider text-white/70 mb-1">
-              PLAYER NAME
-            </Text>
             <TextInput
               placeholder="Enter player name"
               placeholderTextColor="rgba(255,255,255,0.3)"
@@ -498,9 +497,6 @@ export function ActionWheel() {
           </View>
 
           <View style={{ width: 85 }}>
-            <Text className="text-[9.5px] font-black uppercase tracking-wider text-white/70 mb-1">
-              AGE
-            </Text>
             <TextInput
               placeholder="Age"
               placeholderTextColor="rgba(255,255,255,0.3)"
@@ -515,9 +511,6 @@ export function ActionWheel() {
         {/* Row 2: PLAYER POSITION & NUMBER */}
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <View style={{ flex: 1 }}>
-            <Text className="text-[9.5px] font-black uppercase tracking-wider text-white/70 mb-1">
-              PLAYER POSITION
-            </Text>
             <TouchableOpacity
               onPress={() => setPositionModalOpen(true)}
               className="bg-[#12151D] border border-white/10 rounded-xl px-3 py-2 flex-row items-center justify-between"
@@ -537,11 +530,8 @@ export function ActionWheel() {
           </View>
 
           <View style={{ width: 85 }}>
-            <Text className="text-[9.5px] font-black uppercase tracking-wider text-white/70 mb-1">
-              NUMBER
-            </Text>
             <TextInput
-              placeholder="No."
+              placeholder="Jersey No."
               placeholderTextColor="rgba(255,255,255,0.3)"
               keyboardType="numeric"
               value={playerNumber}
@@ -599,14 +589,8 @@ export function ActionWheel() {
           <Text className="text-5xl font-black text-white tracking-tight">
             {total}
           </Text>
-          <Text className="text-[8px] font-black uppercase tracking-widest text-white/80">
+          <Text className="text-[10px] font-black uppercase tracking-widest text-white/90">
             TOTAL TOUCHES
-          </Text>
-          <Text
-            style={{ letterSpacing: 2 }}
-            className="text-[11px] font-black uppercase text-white mt-0.5"
-          >
-            TOUCHES
           </Text>
 
           {lastLoggedAction && (
@@ -655,7 +639,7 @@ export function ActionWheel() {
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => setSelectedQuality('Positive')}
+            onPress={() => setSelectedQuality((prev) => (prev === 'Positive' ? null : 'Positive'))}
             style={{ flex: 1 }}
             className={`py-2 px-4 rounded-xl flex-row items-center justify-center gap-2 ${
               selectedQuality === 'Positive'
@@ -671,7 +655,7 @@ export function ActionWheel() {
 
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => setSelectedQuality('Negative')}
+            onPress={() => setSelectedQuality((prev) => (prev === 'Negative' ? null : 'Negative'))}
             style={{ flex: 1 }}
             className={`py-2 px-4 rounded-xl flex-row items-center justify-center gap-2 ${
               selectedQuality === 'Negative'

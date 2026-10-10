@@ -15,8 +15,8 @@ const WELL_DONE_TAGS = [
 const PERFORMANCE_METRICS = [
   'ENDURANCE', 'ENERGY', 'DECISION MAKING', 'CONFIDENCE',
   'MOTIVATION', 'ENJOYMENT', 'FOCUS', 'PERFORMANCE',
-  'FIRST TOUCH', 'PASSING', 'RECEIVING', 'WILL',
-  'FITNESS', 'FUN', 'WILL TO WIN', 'TEAM PLAYER',
+  'FIRST TOUCH', 'PASSING', 'RECEIVING',
+  'FITNESS', 'WILL TO WIN', 'TEAM PLAYER',
 ];
 
 export function PlayerReflection() {
@@ -120,9 +120,6 @@ export function PlayerReflection() {
       {/* ── Name & Age Card ── */}
       <View style={{ flexDirection: 'row', gap: 10 }} className="p-3.5 rounded-2xl border border-white/10 bg-[#12151D]">
         <View style={{ flex: 1 }}>
-          <Text className="text-[9px] font-black uppercase text-white/70 mb-1">
-            PLAYER NAME
-          </Text>
           <TextInput
             value={formData.playerName}
             onChangeText={(text) => handleTextChange('playerName', text)}
@@ -132,9 +129,6 @@ export function PlayerReflection() {
           />
         </View>
         <View style={{ width: 85 }}>
-          <Text className="text-[9px] font-black uppercase text-white/70 mb-1">
-            AGE
-          </Text>
           <TextInput
             value={formData.playerAge}
             onChangeText={(text) => handleTextChange('playerAge', text)}

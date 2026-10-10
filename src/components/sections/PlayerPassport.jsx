@@ -61,8 +61,15 @@ export function PlayerPassport() {
   const totalGoals = cumulativeStats.totalGoals || 0;
   const totalGames = cumulativeStats.totalGames || 0;
 
+  let playerAge = null;
+  try {
+    const p = JSON.parse(localStorage.getItem("playerProfile") || "{}");
+    playerAge = p.age || session?.age;
+  } catch (e) {}
+  const isUnder13 = playerAge && parseInt(playerAge, 10) < 13;
+
   const passportFields = [
-    { id: "dateOfBirth", label: "DATE OF BIRTH", placeholder: "YYYY-MM-DD" },
+    ...(!isUnder13 ? [{ id: "dateOfBirth", label: "DATE OF BIRTH", placeholder: "YYYY-MM-DD" }] : []),
     { id: "placeOfBirth", label: "PLACE OF BIRTH", placeholder: "City, Country" },
     { id: "country", label: "COUNTRY", placeholder: "Nation" },
     { id: "club", label: "CLUB", placeholder: "Current Club" },
@@ -70,7 +77,7 @@ export function PlayerPassport() {
     { id: "position", label: "POSITION", placeholder: "e.g. ST, CAM, CB" },
     { id: "favoriteTeam", label: "FAVOURITE TEAM", placeholder: "Favorite Football Team" },
     { id: "favoritePlayer", label: "FAVOURITE PLAYER", placeholder: "Favorite Footballer" },
-    { id: "instagram", label: "INSTAGRAM", placeholder: "@username" },
+    ...(!isUnder13 ? [{ id: "instagram", label: "INSTAGRAM", placeholder: "@username" }] : []),
     { id: "level", label: "LEVEL", placeholder: "Academy / Semi-Pro / Pro" },
     { id: "division", label: "DIVISION", placeholder: "U-18 / Tier 1" },
   ];
@@ -84,7 +91,7 @@ export function PlayerPassport() {
         </h2>
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[9px] font-black uppercase">
           <ShieldCheck size={12} />
-          <span>VERIFIED ATHLETE</span>
+          <span>PLAYER ID</span>
         </div>
       </div>
 

@@ -34,10 +34,30 @@ function TouchCounterPage() {
 
 function IndexRedirect() {
   const { isAuthenticated } = useAuth();
-  const hasProfile = typeof window !== "undefined" && Boolean(localStorage.getItem("playerProfile"));
-  const hasToken = typeof window !== "undefined" && Boolean(localStorage.getItem("authToken"));
+  let hasValidProfile = false;
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("playerProfile");
+    const isRegistered = localStorage.getItem("isRegistered") === "true";
+    if (stored && isRegistered) {
+      try {
+        const parsed = JSON.parse(stored);
+        const isUnder13 = parsed.age !== "" && parseInt(parsed.age, 10) < 13;
+        if (isUnder13) {
+          hasValidProfile = Boolean(
+            parsed.parentConsent?.parentName &&
+            parsed.parentConsent?.parentEmail &&
+            parsed.parentConsent?.verified
+          );
+        } else {
+          hasValidProfile = true;
+        }
+      } catch {
+        hasValidProfile = false;
+      }
+    }
+  }
 
-  if (isAuthenticated || hasToken || hasProfile) {
+  if (isAuthenticated || hasValidProfile) {
     return <Navigate to="/dashboard" replace />;
   }
   return <Navigate to="/register" replace />;

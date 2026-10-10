@@ -83,14 +83,13 @@ export function useActiveSession() {
   // Calculate stats from touches
   const stats = useMemo(() => {
     const INDEPENDENT_EVENTS = [
+      'Goal',
       'Yellow Card',
       'Red Card',
       'Missed Game',
       'Sub In',
       'Sub Out',
       'Injury',
-      'Penalty',
-      'Penalty Kick',
       'Keep-Up-Feet',
       'Keep-Up-Head',
     ];
@@ -99,6 +98,7 @@ export function useActiveSession() {
       total: 0,
       good: 0,
       bad: 0,
+      unrated: 0,
       Pass: 0,
       Dribble: 0,
       'Corner Kick': 0,
@@ -129,8 +129,13 @@ export function useActiveSession() {
 
       if (!isIndependent) {
         acc.total++;
-        if (touch.quality === 'Positive') acc.good++;
-        if (touch.quality === 'Negative') acc.bad++;
+        if (touch.quality === 'Positive') {
+          acc.good++;
+        } else if (touch.quality === 'Negative') {
+          acc.bad++;
+        } else {
+          acc.unrated++;
+        }
       }
 
       if (touch.actionType) {

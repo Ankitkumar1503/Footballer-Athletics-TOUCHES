@@ -66,6 +66,22 @@ class Collection {
     return newItem.id;
   }
 
+  async put(item) {
+    if (!item) return;
+    const items = await this.getAll();
+    const safeItems = Array.isArray(items) ? [...items] : [];
+    const id = item.id || Date.now() + Math.random().toString(36).substr(2, 9);
+    const itemWithId = { ...item, id };
+    const index = safeItems.findIndex((i) => i && i.id === id);
+    if (index !== -1) {
+      safeItems[index] = itemWithId;
+    } else {
+      safeItems.push(itemWithId);
+    }
+    await this.setAll(safeItems);
+    return id;
+  }
+
   async update(id, updates) {
     const items = await this.getAll();
     const safeItems = Array.isArray(items) ? items : [];

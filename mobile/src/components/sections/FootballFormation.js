@@ -445,9 +445,6 @@ export function FootballFormation() {
       <View className="p-3.5 rounded-2xl border border-white/10 bg-[#12151D] space-y-2.5">
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <View style={{ flex: 1 }}>
-            <Text className="text-[8.5px] font-black uppercase text-white/60 mb-1">
-              TEAM
-            </Text>
             <TextInput
               value={formData.teamName}
               onChangeText={(val) => handleMetadataChange('teamName', val)}
@@ -457,13 +454,10 @@ export function FootballFormation() {
             />
           </View>
           <View style={{ flex: 1 }}>
-            <Text className="text-[8.5px] font-black uppercase text-white/60 mb-1">
-              AGE GROUP
-            </Text>
             <TextInput
               value={formData.ageGroup}
               onChangeText={(val) => handleMetadataChange('ageGroup', val)}
-              placeholder="U16"
+              placeholder="Age Group"
               placeholderTextColor="rgba(255,255,255,0.3)"
               className="bg-black/40 text-white px-3 py-2 text-xs font-semibold rounded-xl border border-white/15"
             />
@@ -472,9 +466,6 @@ export function FootballFormation() {
 
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <View style={{ flex: 1 }}>
-            <Text className="text-[8.5px] font-black uppercase text-white/60 mb-1">
-              DATE
-            </Text>
             <TextInput
               value={formData.date}
               onChangeText={(val) => handleMetadataChange('date', val)}
@@ -484,9 +475,6 @@ export function FootballFormation() {
             />
           </View>
           <View style={{ flex: 1 }}>
-            <Text className="text-[8.5px] font-black uppercase text-white/60 mb-1">
-              OPPONENT
-            </Text>
             <TextInput
               value={formData.opponent}
               onChangeText={(val) => handleMetadataChange('opponent', val)}

@@ -66,9 +66,7 @@ const PERFORMANCE_METRICS = [
   "FIRST TOUCH",
   "PASSING",
   "RECEIVING",
-  "WILL",
   "FITNESS",
-  "FUN",
   "WILL TO WIN",
   "TEAM PLAYER",
 ];
@@ -221,13 +219,11 @@ export function PlayerReflection({ isPdf, pdfPart }) {
           {/* Player Info Inputs */}
           <div className="grid grid-cols-2 gap-3 p-3.5 rounded-2xl border border-white/10 bg-[#12151D]">
             <div>
-              <label htmlFor="playerName" className="block text-[9px] font-black uppercase tracking-wider text-white/60 mb-1">
-                PLAYER NAME
-              </label>
               <input
                 id="playerName"
                 type="text"
                 placeholder="Player name"
+                aria-label="Player Name"
                 value={formData.playerName}
                 onChange={handleTextChange}
                 data-align="center"
@@ -236,13 +232,11 @@ export function PlayerReflection({ isPdf, pdfPart }) {
             </div>
 
             <div>
-              <label htmlFor="playerAge" className="block text-[9px] font-black uppercase tracking-wider text-white/60 mb-1">
-                AGE
-              </label>
               <input
                 id="playerAge"
                 type="number"
                 placeholder="Age"
+                aria-label="Age"
                 value={formData.playerAge}
                 onChange={handleTextChange}
                 data-align="center"
