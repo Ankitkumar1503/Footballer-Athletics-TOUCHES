@@ -1,16 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
-// Backend API URL: Supports EXPO_PUBLIC_BACKEND_API_URL or local development backend
+// Backend API URL: Supports EXPO_PUBLIC_BACKEND_API_URL or live backend fallback
 const getApiBaseUrl = () => {
   if (process.env.EXPO_PUBLIC_BACKEND_API_URL) {
     return process.env.EXPO_PUBLIC_BACKEND_API_URL;
   }
-  // Android emulator accesses host machine's localhost via 10.0.2.2
-  if (typeof Platform !== 'undefined' && Platform.OS === 'android') {
-    return 'http://10.0.2.2:5000';
-  }
-  return 'http://localhost:5000';
+  return 'https://football-backend-gfr2.onrender.com';
 };
 
 const API_BASE_URL = getApiBaseUrl();

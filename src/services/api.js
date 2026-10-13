@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Base URL configured from VITE_BACKEND_API_URL env variable with fallback
 const API_BASE_URL =
-  import.meta.env.VITE_BACKEND_API_URL || "http://localhost:5000";
+  import.meta.env.VITE_BACKEND_API_URL || "https://football-backend-gfr2.onrender.com";
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
